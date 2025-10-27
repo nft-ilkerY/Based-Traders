@@ -8,6 +8,7 @@ import TradingInterface from './components/TradingInterface'
 import Profile from './components/Profile'
 import Leaderboard from './components/Leaderboard'
 import '@rainbow-me/rainbowkit/styles.css'
+import '@farcaster/auth-kit/styles.css'
 
 const queryClient = new QueryClient()
 
@@ -16,6 +17,9 @@ const authKitConfig = {
   domain: window.location.host,
   siweUri: window.location.origin,
 }
+
+// Debug: Log configuration
+console.log('AuthKit Config:', authKitConfig)
 
 function App() {
   const [currentPage, setCurrentPage] = useState<'trading' | 'profile' | 'leaderboard'>('trading')
