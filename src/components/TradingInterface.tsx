@@ -46,9 +46,11 @@ export default function TradingInterface() {
           pfpUrl: profile.pfpUrl,
         }),
       }).then(() => {
-        gameState.initPlayer(profile.username).then(state => {
-          setPlayerState(state)
-        })
+        if (profile.username) {
+          gameState.initPlayer(profile.username).then(state => {
+            setPlayerState(state)
+          })
+        }
       }).catch(error => {
         console.error('Failed to create player:', error)
       })
@@ -319,7 +321,9 @@ export default function TradingInterface() {
                     playerCash={playerState.cash}
                     playerTotalValue={playerState.totalValue}
                     onOpenPosition={async (amount, leverage, type) => {
-                      await gameState.openPosition(profile.username, amount, leverage, type, currentPrice, 'BATR')
+                      if (profile.username) {
+                        await gameState.openPosition(profile.username, amount, leverage, type, currentPrice, 'BATR')
+                      }
                     }}
                   />
                 )}

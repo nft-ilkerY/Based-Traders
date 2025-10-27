@@ -3,7 +3,7 @@ class PriceEngine {
   private price: number = 100
   private listeners: Set<(price: number) => void> = new Set()
   private ws: WebSocket | null = null
-  private reconnectTimeout: NodeJS.Timeout | null = null
+  private reconnectTimeout: number | null = null
 
   constructor() {
     this.connect()
