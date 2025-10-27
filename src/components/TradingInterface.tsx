@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { priceEngine } from '../lib/priceEngine'
 import { gameState } from '../lib/gameState'
 import type { PlayerState } from '../lib/gameState'
 import PriceChart from './PriceChart'
 import PositionRow from './PositionRow'
 import TradingControls from './TradingControls'
+import FarcasterAuth from './FarcasterAuth'
 
 export default function TradingInterface() {
   const { address, isConnected } = useAccount()
@@ -97,7 +97,7 @@ export default function TradingInterface() {
             <p className="text-gray-400 text-sm mt-1">Real-time Trading on Base Chain</p>
           </div>
         </div>
-        <ConnectButton />
+        <FarcasterAuth />
       </header>
 
       {!isConnected ? (

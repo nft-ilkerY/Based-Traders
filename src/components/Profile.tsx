@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { gameState } from '../lib/gameState'
+import FarcasterAuth from './FarcasterAuth'
 
 interface ProfileStats {
   address: string
@@ -203,7 +203,7 @@ export default function Profile() {
             <p className="text-gray-400 text-sm mt-1">Real-time Trading on Base Chain</p>
           </div>
         </div>
-        <ConnectButton />
+        <FarcasterAuth />
       </header>
 
       {!isConnected ? (

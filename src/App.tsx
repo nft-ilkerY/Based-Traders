@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
+import { AuthKitProvider } from '@farcaster/auth-kit'
 import { config } from './wagmi.config'
 import TradingInterface from './components/TradingInterface'
 import Profile from './components/Profile'
@@ -10,13 +11,20 @@ import '@rainbow-me/rainbowkit/styles.css'
 
 const queryClient = new QueryClient()
 
+const authKitConfig = {
+  rpcUrl: 'https://mainnet.optimism.io',
+  domain: window.location.host,
+  siweUri: window.location.origin,
+}
+
 function App() {
   const [currentPage, setCurrentPage] = useState<'trading' | 'profile' | 'leaderboard'>('trading')
 
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
+    <AuthKitProvider config={authKitConfig}>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider>
           <div className="min-h-screen bg-gradient-to-br from-[#090a0f] via-[#0a0b10] to-[#0b0c11] text-white">
             {/* Modern Navigation with Glassmorphism */}
             <nav className="border-b border-gray-700/30 bg-gradient-to-r from-[#0f1117]/80 to-[#0a0c12]/80 backdrop-blur-xl sticky top-0 z-50 shadow-lg">
@@ -83,9 +91,10 @@ function App() {
               <Leaderboard />
             )}
           </div>
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </AuthKitProvider>
   )
 }
 
