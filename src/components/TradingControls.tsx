@@ -45,8 +45,8 @@ export default function TradingControls({
         <div className="relative" style={{ marginTop: '-1px' }}>
           <div className="absolute w-full h-2 bg-gray-700 rounded-lg pointer-events-none">
             <div
-              className="h-full bg-[#0000FF] rounded-lg transition-all duration-150"
-              style={{ width: `${amountPercent}%` }}
+              className="h-full bg-[#0000FF] rounded-lg"
+              style={{ width: `${amountPercent}%`, transition: 'none' }}
             />
           </div>
           <input
@@ -74,8 +74,8 @@ export default function TradingControls({
         <div className="relative" style={{ marginTop: '-1px' }}>
           <div className="absolute w-full h-2 bg-gray-700 rounded-lg pointer-events-none">
             <div
-              className="h-full bg-[#0000FF] rounded-lg transition-all duration-150"
-              style={{ width: `${((leverage - 1) / 9) * 100}%` }}
+              className="h-full bg-[#0000FF] rounded-lg"
+              style={{ width: `${((leverage - 1) / 9) * 100}%`, transition: 'none' }}
             />
           </div>
           <input

@@ -183,43 +183,43 @@ export default function TradingInterface() {
             </div>
           </div>
 
-          {/* Portfolio Stats with Glassmorphism */}
+          {/* Portfolio Stats - Compact */}
           {playerState && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-2xl p-5 border border-gray-700/50 hover:border-[#0000FF]/30 transition-all duration-300 hover:shadow-md hover:shadow-[#0000FF]/8 backdrop-blur-sm shadow-sm shadow-[#0000FF]/2 group">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl group-hover:scale-110 transition-transform">💵</span>
-                  <p className="text-gray-400 text-sm font-medium">Cash</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-xl p-3 border border-gray-700/50 backdrop-blur-sm">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-sm">💵</span>
+                  <p className="text-gray-400 text-xs font-medium">Cash</p>
                 </div>
-                <p className="text-3xl font-bold">${playerState.cash.toFixed(2)}</p>
+                <p className="text-lg font-bold">${playerState.cash.toFixed(2)}</p>
               </div>
-              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-2xl p-5 border border-gray-700/50 hover:border-[#0000FF]/30 transition-all duration-300 hover:shadow-md hover:shadow-[#0000FF]/8 backdrop-blur-sm shadow-sm shadow-[#0000FF]/2 group">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl group-hover:scale-110 transition-transform">💎</span>
-                  <p className="text-gray-400 text-sm font-medium">Total Value</p>
+              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-xl p-3 border border-gray-700/50 backdrop-blur-sm">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-sm">💎</span>
+                  <p className="text-gray-400 text-xs font-medium">Total Value</p>
                 </div>
-                <p className="text-3xl font-bold">${playerState.totalValue.toFixed(2)}</p>
+                <p className="text-lg font-bold">${playerState.totalValue.toFixed(2)}</p>
               </div>
-              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-2xl p-5 border border-gray-700/50 hover:border-[#0000FF]/30 transition-all duration-300 hover:shadow-md hover:shadow-[#0000FF]/8 backdrop-blur-sm shadow-sm shadow-[#0000FF]/2 group">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl group-hover:scale-110 transition-transform">{playerState.pnl >= 0 ? '📈' : '📉'}</span>
-                  <p className="text-gray-400 text-sm font-medium">P&L</p>
+              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-xl p-3 border border-gray-700/50 backdrop-blur-sm">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-sm">{playerState.pnl >= 0 ? '📈' : '📉'}</span>
+                  <p className="text-gray-400 text-xs font-medium">P&L</p>
                 </div>
                 <p
-                  className={`text-3xl font-bold ${
+                  className={`text-lg font-bold ${
                     playerState.pnl >= 0 ? 'text-green-400' : 'text-red-400'
                   }`}
                 >
                   {playerState.pnl >= 0 ? '+' : ''}${playerState.pnl.toFixed(2)}
                 </p>
               </div>
-              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-2xl p-5 border border-gray-700/50 hover:border-[#0000FF]/30 transition-all duration-300 hover:shadow-md hover:shadow-[#0000FF]/8 backdrop-blur-sm shadow-sm shadow-[#0000FF]/2 group">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl group-hover:scale-110 transition-transform">⚡</span>
-                  <p className="text-gray-400 text-sm font-medium">P&L %</p>
+              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-xl p-3 border border-gray-700/50 backdrop-blur-sm">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-sm">⚡</span>
+                  <p className="text-gray-400 text-xs font-medium">P&L %</p>
                 </div>
                 <p
-                  className={`text-3xl font-bold ${
+                  className={`text-lg font-bold ${
                     playerState.pnlPercent >= 0 ? 'text-green-400' : 'text-red-400'
                   }`}
                 >
