@@ -97,9 +97,10 @@ export default function PriceChart({ data }: PriceChartProps) {
             <text
               x={width - rightPadding + 10}
               y={label.y + 4}
-              fill="rgba(255, 255, 255, 0.3)"
-              fontSize="12"
-              fontFamily="monospace"
+              fill="rgba(255, 255, 255, 0.5)"
+              fontSize="16"
+              fontWeight="600"
+              fontFamily="system-ui, -apple-system, sans-serif"
             >
               ${label.price.toFixed(2)}
             </text>
