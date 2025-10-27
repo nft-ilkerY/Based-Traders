@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { AuthKitProvider, useProfile } from '@farcaster/auth-kit'
 import TradingInterface from './components/TradingInterface'
-import Profile from './components/Profile'
+import ProfileComponent from './components/Profile'
 import Leaderboard from './components/Leaderboard'
 import FarcasterAuth from './components/FarcasterAuth'
 import { sessionManager } from './lib/sessionManager'
@@ -43,7 +43,7 @@ function AppContent() {
   const { isAuthenticated, profile } = useProfile()
   const [currentPage, setCurrentPage] = useState<'home' | 'trading' | 'profile' | 'leaderboard'>('home')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [restoredProfile, setRestoredProfile] = useState<typeof profile>(null)
+  const [restoredProfile, setRestoredProfile] = useState<any>(null)
 
   // Debug: Log authentication state changes
   console.log('AppContent render - isAuthenticated:', isAuthenticated, 'profile:', profile, 'restored:', restoredProfile)
@@ -52,8 +52,8 @@ function AppContent() {
   useEffect(() => {
     if (isAuthenticated && profile) {
       sessionManager.save({
-        fid: profile.fid,
-        username: profile.username,
+        fid: profile.fid || 0,
+        username: profile.username || '',
         displayName: profile.displayName,
         pfpUrl: profile.pfpUrl,
         bio: profile.bio,
@@ -262,7 +262,7 @@ function AppContent() {
       ) : currentPage === 'trading' ? (
         <TradingInterface overrideProfile={restoredProfile} />
       ) : currentPage === 'profile' ? (
-        <Profile overrideProfile={restoredProfile} />
+        <ProfileComponent overrideProfile={restoredProfile} />
       ) : (
         <Leaderboard />
       )}
@@ -274,7 +274,9 @@ function App() {
   return (
     <PersistQueryClientProvider
       client={queryClient}
-      persister={persister}
+      persistOptions={{
+        persister,
+      }}
       onSuccess={() => {
         console.log('✅ Query cache restored from localStorage')
       }}
