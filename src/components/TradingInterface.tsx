@@ -6,7 +6,6 @@ import type { PlayerState } from '../lib/gameState'
 import PriceChart from './PriceChart'
 import PositionRow from './PositionRow'
 import TradingControls from './TradingControls'
-import FarcasterAuth from './FarcasterAuth'
 
 export default function TradingInterface() {
   const { isAuthenticated, profile } = useProfile()
@@ -99,23 +98,7 @@ export default function TradingInterface() {
   }, [profile?.username])
 
   return (
-    <div className="w-full min-h-screen p-4 bg-gradient-to-br from-[#090a0f] via-[#0a0b10] to-[#0b0c11]">
-      {/* Header with glassmorphism - Mobile Responsive */}
-      <header className="flex flex-col gap-4 mb-6 max-w-7xl mx-auto">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#0000FF] to-[#0000AA] rounded-xl flex items-center justify-center shadow-lg shadow-[#0000FF]/20 flex-shrink-0">
-            <span className="text-xl sm:text-2xl">⚡</span>
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight">
-              <span className="bg-gradient-to-r from-[#0000FF] to-[#4444FF] bg-clip-text text-transparent">Based</span> Traders
-            </h1>
-            <p className="text-gray-400 text-xs sm:text-sm mt-1">Real-time Trading on Base Chain</p>
-          </div>
-        </div>
-        <FarcasterAuth />
-      </header>
-
+    <div className="w-full min-h-screen p-4">
       {!isAuthenticated ? (
         <div className="max-w-3xl mx-auto mt-10 sm:mt-20 text-center">
           <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-2xl sm:rounded-3xl p-6 sm:p-12 border border-gray-700/50 relative overflow-hidden backdrop-blur-xl shadow-2xl shadow-[#0000FF]/10">

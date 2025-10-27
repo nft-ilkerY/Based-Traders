@@ -1,21 +1,7 @@
-import { useEffect, useState } from 'react'
 import { SignInButton, useProfile } from '@farcaster/auth-kit'
 
 export default function FarcasterAuth() {
   const { isAuthenticated, profile } = useProfile()
-  const [isInFarcaster, setIsInFarcaster] = useState(false)
-
-  // Check if running inside Farcaster
-  useEffect(() => {
-    const checkFarcasterContext = () => {
-      // Check for Farcaster context indicators
-      const isFarcasterFrame = window.parent !== window
-      setIsInFarcaster(isFarcasterFrame)
-      console.log('Is in Farcaster:', isFarcasterFrame)
-    }
-
-    checkFarcasterContext()
-  }, [])
 
   if (isAuthenticated && profile) {
     return (
@@ -42,25 +28,15 @@ export default function FarcasterAuth() {
   }
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 w-full sm:w-auto">
-      {/* Show Farcaster context info */}
-      {isInFarcaster && !isAuthenticated && (
-        <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg px-3 py-2 text-xs sm:text-sm text-purple-200 text-center">
-          Running in Farcaster
-        </div>
-      )}
-
-      {/* Farcaster Sign In Button - using official component */}
-      <div className="w-full sm:w-auto">
-        <SignInButton
-          onSuccess={({ fid, username }) => {
-            console.log(`Farcaster auth success! Hello, ${username}! Your fid is ${fid}.`)
-          }}
-          onError={(error) => {
-            console.error('Farcaster auth error:', error)
-          }}
-        />
-      </div>
+    <div className="w-full sm:w-auto">
+      <SignInButton
+        onSuccess={({ fid, username }) => {
+          console.log(`Farcaster auth success! Hello, ${username}! Your fid is ${fid}.`)
+        }}
+        onError={(error) => {
+          console.error('Farcaster auth error:', error)
+        }}
+      />
     </div>
   )
 }
