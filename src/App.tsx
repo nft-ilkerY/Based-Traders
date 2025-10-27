@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { AuthKitProvider, useProfile } from '@farcaster/auth-kit'
 import TradingInterface from './components/TradingInterface'
 import Profile from './components/Profile'
@@ -7,18 +9,34 @@ import Leaderboard from './components/Leaderboard'
 import FarcasterAuth from './components/FarcasterAuth'
 import '@farcaster/auth-kit/styles.css'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours
+      staleTime: 1000 * 60 * 60, // 1 hour
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: 1,
+    },
+  },
+})
+
+const persister = createSyncStoragePersister({
+  storage: window.localStorage,
+  key: 'FARCASTER_AUTH_CACHE',
+})
 
 const authKitConfig = {
   rpcUrl: 'https://mainnet.optimism.io',
-  domain: window.location.host,
+  domain: window.location.hostname,
   siweUri: window.location.origin,
-  // Ensure session persistence
   relay: 'https://relay.farcaster.xyz',
 }
 
-// Debug: Log configuration
+// Debug: Log configuration and check for stored auth data
 console.log('AuthKit Config:', authKitConfig)
+console.log('LocalStorage keys:', Object.keys(localStorage))
+console.log('LocalStorage farcaster data:', Object.keys(localStorage).filter(k => k.includes('farcaster') || k.includes('auth')).map(k => ({ key: k, value: localStorage.getItem(k)?.substring(0, 100) })))
 
 function AppContent() {
   const { isAuthenticated, profile } = useProfile()
@@ -213,11 +231,17 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthKitProvider config={authKitConfig}>
-      <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persister={persister}
+      onSuccess={() => {
+        console.log('✅ Query cache restored from localStorage')
+      }}
+    >
+      <AuthKitProvider config={authKitConfig}>
         <AppContent />
-      </QueryClientProvider>
-    </AuthKitProvider>
+      </AuthKitProvider>
+    </PersistQueryClientProvider>
   )
 }
 
