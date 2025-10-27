@@ -302,7 +302,6 @@ export default function TradingInterface() {
                 </div>
                 {playerState && address && (
                   <TradingControls
-                    currentPrice={currentPrice}
                     playerCash={playerState.cash}
                     playerTotalValue={playerState.totalValue}
                     onOpenPosition={async (amount, leverage, type) => {

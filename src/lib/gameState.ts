@@ -150,7 +150,7 @@ export class GameState {
     state.cash -= amount // Deduct full amount including fee
     state.positions.push(position)
 
-    this.updateTotalValue(state, currentPrice)
+    this.updateTotalValue(state)
     this.notifyListeners(state)
 
     // Save to database
@@ -220,7 +220,7 @@ export class GameState {
     // Remove position
     state.positions = state.positions.filter(p => p.id !== positionId)
 
-    this.updateTotalValue(state, position.currentPrice)
+    this.updateTotalValue(state)
     this.notifyListeners(state)
 
     // Save to database
@@ -344,17 +344,17 @@ export class GameState {
         const currentState = playerStates.get(address)
         if (currentState) {
           currentState.positions = currentState.positions.filter(p => !p.isLiquidated)
-          this.updateTotalValue(currentState, currentPrice)
+          this.updateTotalValue(currentState)
           this.notifyListeners(currentState)
         }
       }, 3000) // Remove after 3 seconds
     }
 
-    this.updateTotalValue(state, currentPrice)
+    this.updateTotalValue(state)
     this.notifyListeners(state)
   }
 
-  private updateTotalValue(state: PlayerState, currentPrice: number) {
+  private updateTotalValue(state: PlayerState) {
     const positionsValue = state.positions
       .filter(p => !p.isLiquidated)
       .reduce((sum, p) => sum + p.collateral + p.pnl, 0)

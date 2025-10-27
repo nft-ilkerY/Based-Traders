@@ -1,14 +1,12 @@
 import { useState } from 'react'
 
 interface TradingControlsProps {
-  currentPrice: number
   playerCash: number
   playerTotalValue: number
   onOpenPosition: (amount: number, leverage: number, type: 'LONG' | 'SHORT') => void
 }
 
 export default function TradingControls({
-  currentPrice,
   playerCash,
   playerTotalValue,
   onOpenPosition,

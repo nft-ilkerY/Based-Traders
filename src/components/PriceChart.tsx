@@ -1,4 +1,4 @@
-import { useState, useRef, MouseEvent } from 'react'
+import { useState, useRef, type MouseEvent } from 'react'
 
 interface PriceChartProps {
   data: number[]

@@ -147,8 +147,8 @@ export default function Profile() {
     }
   }
 
-  const getWinRate = () => {
-    if (!stats || stats.total_trades === 0) return 0
+  const getWinRate = (): string => {
+    if (!stats || stats.total_trades === 0) return '0.0'
     return ((stats.winning_trades / stats.total_trades) * 100).toFixed(1)
   }
 
