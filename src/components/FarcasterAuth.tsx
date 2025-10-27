@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSignIn, useProfile } from '@farcaster/auth-kit'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
@@ -14,8 +14,6 @@ export default function FarcasterAuth() {
     signIn,
     // @ts-ignore
     url: farcasterUrl,
-    isSuccess,
-    isError,
   } = useSignIn({
     onSuccess: (res) => {
       console.log('Farcaster auth success:', res)
