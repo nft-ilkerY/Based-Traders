@@ -80,10 +80,25 @@ export default function FarcasterAuth() {
     )
   }
 
-  const handleFarcasterClick = () => {
+  const handleFarcasterClick = async () => {
     console.log('Farcaster button clicked!')
-    signIn()
+    console.log('Current farcasterUrl:', farcasterUrl)
+    console.log('signIn function:', signIn)
+
+    try {
+      setShowFarcasterLogin(true) // Show modal immediately
+      await signIn()
+      console.log('signIn called successfully')
+    } catch (error) {
+      console.error('signIn error:', error)
+      setShowFarcasterLogin(false)
+    }
   }
+
+  // Debug: Log when URL changes
+  useEffect(() => {
+    console.log('farcasterUrl updated:', farcasterUrl)
+  }, [farcasterUrl])
 
   return (
     <div className="flex items-center gap-3 relative">
@@ -98,8 +113,8 @@ export default function FarcasterAuth() {
         <span>Sign In with Farcaster</span>
       </button>
 
-      {/* QR Code Modal */}
-      {showFarcasterLogin && farcasterUrl && (
+      {/* QR Code Modal or Loading */}
+      {showFarcasterLogin && (
         <div
           className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"
           onClick={() => setShowFarcasterLogin(false)}
@@ -125,27 +140,36 @@ export default function FarcasterAuth() {
               </button>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl mb-4">
-              <img
-                src={farcasterUrl}
-                alt="Farcaster QR Code"
-                className="w-full h-auto"
-              />
-            </div>
+            {farcasterUrl ? (
+              <>
+                <div className="bg-white p-6 rounded-2xl mb-4">
+                  <img
+                    src={farcasterUrl}
+                    alt="Farcaster QR Code"
+                    className="w-full h-auto"
+                  />
+                </div>
 
-            <div className="space-y-3">
-              <p className="text-gray-300 text-sm text-center">
-                Scan this QR code with your Farcaster app to sign in
-              </p>
-              <a
-                href={farcasterUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full text-center bg-gradient-to-r from-[#8a63d2] to-[#6a4bb5] hover:from-[#9b74e3] hover:to-[#7b5cc6] px-4 py-3 rounded-xl font-semibold transition-all duration-300"
-              >
-                Open in Warpcast
-              </a>
-            </div>
+                <div className="space-y-3">
+                  <p className="text-gray-300 text-sm text-center">
+                    Scan this QR code with your Farcaster app to sign in
+                  </p>
+                  <a
+                    href={farcasterUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full text-center bg-gradient-to-r from-[#8a63d2] to-[#6a4bb5] hover:from-[#9b74e3] hover:to-[#7b5cc6] px-4 py-3 rounded-xl font-semibold transition-all duration-300"
+                  >
+                    Open in Warpcast
+                  </a>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 mb-4"></div>
+                <p className="text-gray-300 text-sm">Loading QR Code...</p>
+              </div>
+            )}
           </div>
         </div>
       )}
