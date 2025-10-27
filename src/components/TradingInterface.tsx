@@ -100,37 +100,37 @@ export default function TradingInterface() {
 
   return (
     <div className="w-full min-h-screen p-4 bg-gradient-to-br from-[#090a0f] via-[#0a0b10] to-[#0b0c11]">
-      {/* Header with glassmorphism */}
-      <header className="flex justify-between items-center mb-8 max-w-7xl mx-auto">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-[#0000FF] to-[#0000AA] rounded-xl flex items-center justify-center shadow-lg shadow-[#0000FF]/20">
-            <span className="text-2xl">⚡</span>
+      {/* Header with glassmorphism - Mobile Responsive */}
+      <header className="flex flex-col gap-4 mb-6 max-w-7xl mx-auto">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#0000FF] to-[#0000AA] rounded-xl flex items-center justify-center shadow-lg shadow-[#0000FF]/20 flex-shrink-0">
+            <span className="text-xl sm:text-2xl">⚡</span>
           </div>
-          <div>
-            <h1 className="text-4xl font-bold text-white tracking-tight">
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight">
               <span className="bg-gradient-to-r from-[#0000FF] to-[#4444FF] bg-clip-text text-transparent">Based</span> Traders
             </h1>
-            <p className="text-gray-400 text-sm mt-1">Real-time Trading on Base Chain</p>
+            <p className="text-gray-400 text-xs sm:text-sm mt-1">Real-time Trading on Base Chain</p>
           </div>
         </div>
         <FarcasterAuth />
       </header>
 
       {!isAuthenticated ? (
-        <div className="max-w-3xl mx-auto mt-20 text-center">
-          <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-3xl p-12 border border-gray-700/50 relative overflow-hidden backdrop-blur-xl shadow-2xl shadow-[#0000FF]/10">
+        <div className="max-w-3xl mx-auto mt-10 sm:mt-20 text-center">
+          <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-2xl sm:rounded-3xl p-6 sm:p-12 border border-gray-700/50 relative overflow-hidden backdrop-blur-xl shadow-2xl shadow-[#0000FF]/10">
             {/* Animated decorative elements */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#0000FF] opacity-10 rounded-full blur-3xl animate-pulse"></div>
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#4444FF] opacity-10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
 
             <div className="relative z-10">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#0000FF] to-[#0000AA] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#0000FF]/30">
-                <span className="text-4xl">⚡</span>
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-[#0000FF] to-[#0000AA] rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg shadow-[#0000FF]/30">
+                <span className="text-3xl sm:text-4xl">⚡</span>
               </div>
-              <h2 className="text-5xl font-bold mb-4">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
                 Welcome to <span className="bg-gradient-to-r from-[#0000FF] to-[#4444FF] bg-clip-text text-transparent">Based</span> Traders
               </h2>
-              <p className="text-gray-300 text-lg mb-10 max-w-xl mx-auto">
+              <p className="text-gray-300 text-sm sm:text-base md:text-lg mb-6 sm:mb-10 max-w-xl mx-auto px-2">
                 Sign in with Farcaster to start trading with leverage. Get <span className="text-[#0000FF] font-bold">$1,000</span> virtual cash to trade with!
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
