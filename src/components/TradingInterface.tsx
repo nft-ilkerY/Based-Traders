@@ -7,8 +7,16 @@ import PriceChart from './PriceChart'
 import PositionRow from './PositionRow'
 import TradingControls from './TradingControls'
 
-export default function TradingInterface() {
-  const { isAuthenticated, profile } = useProfile()
+interface TradingInterfaceProps {
+  overrideProfile?: any
+}
+
+export default function TradingInterface({ overrideProfile }: TradingInterfaceProps) {
+  const { isAuthenticated, profile: authKitProfile } = useProfile()
+
+  // Use override profile if provided (for restored sessions), otherwise use AuthKit profile
+  const profile = overrideProfile || authKitProfile
+  const isLoggedIn = isAuthenticated || !!overrideProfile
   const [currentPrice, setCurrentPrice] = useState(100)
   const [priceHistory, setPriceHistory] = useState<number[]>([])
   const [playerState, setPlayerState] = useState<PlayerState | null>(null)
@@ -34,7 +42,7 @@ export default function TradingInterface() {
 
   // Initialize player when Farcaster connects
   useEffect(() => {
-    if (isAuthenticated && profile?.username) {
+    if (isLoggedIn && profile?.username) {
       console.log('Initializing player:', profile.username)
       setPlayerLoading(true)
 
@@ -67,7 +75,7 @@ export default function TradingInterface() {
         setPlayerLoading(false)
       })
     }
-  }, [isAuthenticated, profile?.username])
+  }, [isLoggedIn, profile?.username])
 
   // Subscribe to price updates
   useEffect(() => {
@@ -112,7 +120,7 @@ export default function TradingInterface() {
 
   return (
     <div className="w-full min-h-screen p-4">
-      {!isAuthenticated ? (
+      {!isLoggedIn ? (
         <div className="max-w-3xl mx-auto mt-10 sm:mt-20 text-center">
           <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-2xl sm:rounded-3xl p-6 sm:p-12 border border-gray-700/50 relative overflow-hidden backdrop-blur-xl shadow-2xl shadow-[#0000FF]/10">
             {/* Animated decorative elements */}

@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react'
 import { useProfile } from '@farcaster/auth-kit'
 import { gameState } from '../lib/gameState'
 
+interface ProfileProps {
+  overrideProfile?: any
+}
+
 interface ProfileStats {
   farcaster_username: string
   farcaster_fid: number
@@ -33,14 +37,18 @@ interface Trade {
   is_liquidated: boolean
 }
 
-export default function Profile() {
-  const { isAuthenticated, profile } = useProfile()
+export default function Profile({ overrideProfile }: ProfileProps = { overrideProfile: undefined }) {
+  const { isAuthenticated, profile: authKitProfile } = useProfile()
+
+  // Use override profile if provided (for restored sessions), otherwise use AuthKit profile
+  const profile = overrideProfile || authKitProfile
+  const isLoggedIn = isAuthenticated || !!overrideProfile
   const [stats, setStats] = useState<ProfileStats | null>(null)
   const [trades, setTrades] = useState<Trade[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (isAuthenticated && profile?.username) {
+    if (isLoggedIn && profile?.username) {
       // Initialize player first
       gameState.initPlayer(profile.username).then(() => {
         loadProfileData()
@@ -53,7 +61,7 @@ export default function Profile() {
 
       return () => clearInterval(interval)
     }
-  }, [isAuthenticated, profile?.username])
+  }, [isLoggedIn, profile?.username])
 
   const loadProfileData = async () => {
     if (!profile?.username) return
@@ -195,7 +203,7 @@ export default function Profile() {
 
   return (
     <div className="w-full min-h-screen p-4">
-      {!isAuthenticated ? (
+      {!isLoggedIn ? (
         <div className="max-w-2xl mx-auto mt-20 text-center">
           <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-3xl p-12 border border-gray-700/50 relative overflow-hidden backdrop-blur-xl shadow-2xl shadow-[#0000FF]/10">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#0000FF] opacity-10 rounded-full blur-3xl animate-pulse"></div>

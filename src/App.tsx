@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
@@ -7,6 +7,7 @@ import TradingInterface from './components/TradingInterface'
 import Profile from './components/Profile'
 import Leaderboard from './components/Leaderboard'
 import FarcasterAuth from './components/FarcasterAuth'
+import { sessionManager } from './lib/sessionManager'
 import '@farcaster/auth-kit/styles.css'
 
 const queryClient = new QueryClient({
@@ -42,9 +43,49 @@ function AppContent() {
   const { isAuthenticated, profile } = useProfile()
   const [currentPage, setCurrentPage] = useState<'home' | 'trading' | 'profile' | 'leaderboard'>('home')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [restoredProfile, setRestoredProfile] = useState<typeof profile>(null)
 
   // Debug: Log authentication state changes
-  console.log('AppContent render - isAuthenticated:', isAuthenticated, 'profile:', profile)
+  console.log('AppContent render - isAuthenticated:', isAuthenticated, 'profile:', profile, 'restored:', restoredProfile)
+
+  // Save session when user authenticates
+  useEffect(() => {
+    if (isAuthenticated && profile) {
+      sessionManager.save({
+        fid: profile.fid,
+        username: profile.username,
+        displayName: profile.displayName,
+        pfpUrl: profile.pfpUrl,
+        bio: profile.bio,
+        custody: profile.custody,
+        verifications: profile.verifications,
+      })
+    }
+  }, [isAuthenticated, profile])
+
+  // Restore session on mount
+  useEffect(() => {
+    if (!isAuthenticated && !profile) {
+      const savedSession = sessionManager.load()
+      if (savedSession) {
+        console.log('🔄 Restoring session from localStorage')
+        setRestoredProfile(savedSession as any)
+      }
+    }
+  }, [isAuthenticated, profile])
+
+  // Clear session on explicit logout
+  useEffect(() => {
+    if (!isAuthenticated && !profile && restoredProfile) {
+      // User explicitly logged out
+      sessionManager.clear()
+      setRestoredProfile(null)
+    }
+  }, [isAuthenticated, profile, restoredProfile])
+
+  // Use restored profile if AuthKit profile is not available
+  const activeProfile = profile || restoredProfile
+  const isLoggedIn = isAuthenticated || !!restoredProfile
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#090a0f] via-[#0a0b10] to-[#0b0c11] text-white">
@@ -55,7 +96,7 @@ function AppContent() {
             {/* Left side - Logo and Navigation */}
             <div className="flex items-center gap-4">
               {/* Hamburger Menu (Mobile Only - when authenticated) */}
-              {isAuthenticated && (
+              {isLoggedIn && (
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className="lg:hidden flex flex-col gap-1.5 w-6 h-6 justify-center"
@@ -80,7 +121,7 @@ function AppContent() {
               </button>
 
               {/* Desktop Navigation Tabs (only when authenticated) */}
-              {isAuthenticated && (
+              {isLoggedIn && (
                 <div className="hidden lg:flex gap-2 ml-4">
                   <button
                     onClick={() => setCurrentPage('trading')}
@@ -127,17 +168,17 @@ function AppContent() {
 
             {/* Right side - Auth */}
             <div className="flex items-center gap-3">
-              {isAuthenticated && profile ? (
+              {isLoggedIn && activeProfile ? (
                 <div className="flex items-center gap-2 bg-gradient-to-br from-[#8a63d2] to-[#6a4bb5] px-2 py-1 rounded-lg border border-purple-400/30 lg:px-3 lg:py-2">
-                  {profile.pfpUrl && (
+                  {activeProfile.pfpUrl && (
                     <img
-                      src={profile.pfpUrl}
-                      alt={profile.username}
+                      src={activeProfile.pfpUrl}
+                      alt={activeProfile.username}
                       className="w-6 h-6 rounded-full lg:w-7 lg:h-7"
                     />
                   )}
                   <span className="text-xs font-semibold text-white hidden sm:inline lg:text-sm">
-                    @{profile.username}
+                    @{activeProfile.username}
                   </span>
                 </div>
               ) : (
@@ -149,7 +190,7 @@ function AppContent() {
       </nav>
 
       {/* Mobile Side Menu (only when authenticated) */}
-      {isAuthenticated && mobileMenuOpen && (
+      {isLoggedIn && mobileMenuOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/50 z-40"
           onClick={() => setMobileMenuOpen(false)}
@@ -215,13 +256,13 @@ function AppContent() {
         </div>
       )}
 
-      {/* Page Content */}
-      {!isAuthenticated || currentPage === 'home' ? (
-        <TradingInterface />
+      {/* Page Content - Pass restored profile to components */}
+      {!isLoggedIn || currentPage === 'home' ? (
+        <TradingInterface overrideProfile={restoredProfile} />
       ) : currentPage === 'trading' ? (
-        <TradingInterface />
+        <TradingInterface overrideProfile={restoredProfile} />
       ) : currentPage === 'profile' ? (
-        <Profile />
+        <Profile overrideProfile={restoredProfile} />
       ) : (
         <Leaderboard />
       )}
