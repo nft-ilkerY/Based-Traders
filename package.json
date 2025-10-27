@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@farcaster/auth-kit": "^0.8.1",
+    "@farcaster/frame-sdk": "^0.0.64",
     "@farcaster/miniapp-wagmi-connector": "^1.1.0",
     "@rainbow-me/rainbowkit": "^2.2.9",
     "@tanstack/query-sync-storage-persister": "^5.90.7",
