@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useAccount } from 'wagmi'
+import { useProfile } from '@farcaster/auth-kit'
 import { priceEngine } from '../lib/priceEngine'
 import { gameState } from '../lib/gameState'
 import type { PlayerState } from '../lib/gameState'
@@ -9,7 +9,7 @@ import TradingControls from './TradingControls'
 import FarcasterAuth from './FarcasterAuth'
 
 export default function TradingInterface() {
-  const { address, isConnected } = useAccount()
+  const { isAuthenticated, profile } = useProfile()
   const [currentPrice, setCurrentPrice] = useState(100)
   const [priceHistory, setPriceHistory] = useState<number[]>([])
   const [playerState, setPlayerState] = useState<PlayerState | null>(null)
@@ -32,14 +32,28 @@ export default function TradingInterface() {
     loadHistory()
   }, [])
 
-  // Initialize player when wallet connects
+  // Initialize player when Farcaster connects
   useEffect(() => {
-    if (isConnected && address) {
-      gameState.initPlayer(address).then(state => {
-        setPlayerState(state)
+    if (isAuthenticated && profile?.username) {
+      // Create player in database with Farcaster profile
+      fetch('http://localhost:3002/api/player/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: profile.username,
+          fid: profile.fid,
+          displayName: profile.displayName,
+          pfpUrl: profile.pfpUrl,
+        }),
+      }).then(() => {
+        gameState.initPlayer(profile.username).then(state => {
+          setPlayerState(state)
+        })
+      }).catch(error => {
+        console.error('Failed to create player:', error)
       })
     }
-  }, [isConnected, address])
+  }, [isAuthenticated, profile])
 
   // Subscribe to price updates
   useEffect(() => {
@@ -56,8 +70,8 @@ export default function TradingInterface() {
       })
 
       // Update player positions with new price
-      if (address) {
-        gameState.updatePrices(address, price)
+      if (profile?.username) {
+        gameState.updatePrices(profile.username, price)
       }
     })
 
@@ -67,20 +81,20 @@ export default function TradingInterface() {
       unsubscribe()
       priceEngine.stop()
     }
-  }, [address, historyLoaded])
+  }, [profile?.username, historyLoaded])
 
   // Subscribe to player state updates
   useEffect(() => {
-    if (!address) return
+    if (!profile?.username) return
 
     const unsubscribe = gameState.subscribe((state) => {
-      if (state.address === address) {
+      if (state.username === profile.username) {
         setPlayerState(state)
       }
     })
 
     return unsubscribe
-  }, [address])
+  }, [profile?.username])
 
   return (
     <div className="w-full min-h-screen p-4 bg-gradient-to-br from-[#090a0f] via-[#0a0b10] to-[#0b0c11]">
@@ -100,7 +114,7 @@ export default function TradingInterface() {
         <FarcasterAuth />
       </header>
 
-      {!isConnected ? (
+      {!isAuthenticated ? (
         <div className="max-w-3xl mx-auto mt-20 text-center">
           <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-3xl p-12 border border-gray-700/50 relative overflow-hidden backdrop-blur-xl shadow-2xl shadow-[#0000FF]/10">
             {/* Animated decorative elements */}
@@ -115,7 +129,7 @@ export default function TradingInterface() {
                 Welcome to <span className="bg-gradient-to-r from-[#0000FF] to-[#4444FF] bg-clip-text text-transparent">Based</span> Traders
               </h2>
               <p className="text-gray-300 text-lg mb-10 max-w-xl mx-auto">
-                Connect your wallet to start trading with leverage. Get <span className="text-[#0000FF] font-bold">$1,000</span> virtual cash to trade with!
+                Sign in with Farcaster to start trading with leverage. Get <span className="text-[#0000FF] font-bold">$1,000</span> virtual cash to trade with!
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 <div className="bg-[#0a0c12]/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-[#0000FF]/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#0000FF]/20">
@@ -277,8 +291,8 @@ export default function TradingInterface() {
                         key={position.id}
                         position={position}
                         onClose={async (id) => {
-                          if (address) {
-                            await gameState.closePosition(address, id)
+                          if (profile?.username) {
+                            await gameState.closePosition(profile.username, id)
                           }
                         }}
                       />
@@ -300,12 +314,12 @@ export default function TradingInterface() {
                   </div>
                   <h3 className="text-xl font-bold">Open New Position</h3>
                 </div>
-                {playerState && address && (
+                {playerState && profile?.username && (
                   <TradingControls
                     playerCash={playerState.cash}
                     playerTotalValue={playerState.totalValue}
                     onOpenPosition={async (amount, leverage, type) => {
-                      await gameState.openPosition(address, amount, leverage, type, currentPrice, 'BATR')
+                      await gameState.openPosition(profile.username, amount, leverage, type, currentPrice, 'BATR')
                     }}
                   />
                 )}

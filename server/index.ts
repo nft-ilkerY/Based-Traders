@@ -223,33 +223,60 @@ app.get('/api/price', (req, res) => {
   })
 })
 
-// Player endpoints
-app.get('/api/player/:address', (req, res) => {
-  const player = db.prepare('SELECT * FROM players WHERE address = ?').get(req.params.address)
+// Player endpoints - using Farcaster username
+app.get('/api/player/:username', (req, res) => {
+  const player = db.prepare('SELECT * FROM players WHERE farcaster_username = ?').get(req.params.username)
 
   if (!player) {
-    // Create new player with $1000 starting cash
-    db.prepare('INSERT INTO players (address, cash, high_score, created_at, updated_at) VALUES (?, ?, ?, ?, ?)').run(
-      req.params.address,
-      1000,
-      1000,
-      Date.now(),
-      Date.now()
-    )
-    return res.json({ address: req.params.address, cash: 1000, high_score: 1000 })
+    // Return null - player should be created via POST with full Farcaster profile
+    return res.json(null)
   }
 
   res.json(player)
 })
 
-app.post('/api/player/:address/update', (req, res) => {
+app.post('/api/player/create', (req, res) => {
+  const { username, fid, displayName, pfpUrl } = req.body
+
+  // Check if player already exists
+  const existing = db.prepare('SELECT * FROM players WHERE farcaster_username = ?').get(username)
+
+  if (existing) {
+    // Update profile info if changed
+    db.prepare('UPDATE players SET farcaster_fid = ?, display_name = ?, pfp_url = ?, updated_at = ? WHERE farcaster_username = ?').run(
+      fid,
+      displayName,
+      pfpUrl,
+      Date.now(),
+      username
+    )
+    return res.json(existing)
+  }
+
+  // Create new player with $1000 starting cash
+  db.prepare('INSERT INTO players (farcaster_username, farcaster_fid, display_name, pfp_url, cash, high_score, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(
+    username,
+    fid,
+    displayName,
+    pfpUrl,
+    1000,
+    1000,
+    Date.now(),
+    Date.now()
+  )
+
+  const newPlayer = db.prepare('SELECT * FROM players WHERE farcaster_username = ?').get(username)
+  res.json(newPlayer)
+})
+
+app.post('/api/player/:username/update', (req, res) => {
   const { cash, high_score } = req.body
 
-  db.prepare('UPDATE players SET cash = ?, high_score = ?, updated_at = ? WHERE address = ?').run(
+  db.prepare('UPDATE players SET cash = ?, high_score = ?, updated_at = ? WHERE farcaster_username = ?').run(
     cash,
     high_score,
     Date.now(),
-    req.params.address
+    req.params.username
   )
 
   res.json({ success: true })
@@ -257,11 +284,11 @@ app.post('/api/player/:address/update', (req, res) => {
 
 // Position endpoints
 app.post('/api/position/open', (req, res) => {
-  const { id, player_address, type, entry_price, leverage, size, collateral } = req.body
+  const { id, player_username, type, entry_price, leverage, size, collateral } = req.body
 
-  db.prepare('INSERT INTO positions (id, player_address, type, entry_price, leverage, size, collateral, opened_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(
+  db.prepare('INSERT INTO positions (id, player_username, type, entry_price, leverage, size, collateral, opened_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(
     id,
-    player_address,
+    player_username,
     type,
     entry_price,
     leverage,
@@ -287,27 +314,27 @@ app.post('/api/position/close', (req, res) => {
   res.json({ success: true })
 })
 
-app.get('/api/positions/:address', (req, res) => {
-  const positions = db.prepare('SELECT * FROM positions WHERE player_address = ? ORDER BY opened_at DESC').all(req.params.address)
+app.get('/api/positions/:username', (req, res) => {
+  const positions = db.prepare('SELECT * FROM positions WHERE player_username = ? ORDER BY opened_at DESC').all(req.params.username)
   res.json(positions)
 })
 
 // Get closed positions for a player
-app.get('/api/positions/:address/closed', (req, res) => {
-  const positions = db.prepare('SELECT * FROM positions WHERE player_address = ? AND closed_at IS NOT NULL ORDER BY closed_at DESC').all(req.params.address)
+app.get('/api/positions/:username/closed', (req, res) => {
+  const positions = db.prepare('SELECT * FROM positions WHERE player_username = ? AND closed_at IS NOT NULL ORDER BY closed_at DESC').all(req.params.username)
   res.json(positions)
 })
 
 // Get player stats
-app.get('/api/player/:address/stats', (req, res) => {
-  const address = req.params.address
+app.get('/api/player/:username/stats', (req, res) => {
+  const username = req.params.username
 
   // Get player basic info
-  const player = db.prepare('SELECT * FROM players WHERE address = ?').get(address) as any
+  const player = db.prepare('SELECT * FROM players WHERE farcaster_username = ?').get(username) as any
 
   if (!player) {
     return res.json({
-      address,
+      farcaster_username: username,
       cash: 1000,
       high_score: 1000,
       created_at: Date.now(),
@@ -323,7 +350,7 @@ app.get('/api/player/:address/stats', (req, res) => {
   }
 
   // Get all closed positions
-  const closedPositions = db.prepare('SELECT * FROM positions WHERE player_address = ? AND closed_at IS NOT NULL').all(address) as any[]
+  const closedPositions = db.prepare('SELECT * FROM positions WHERE player_username = ? AND closed_at IS NOT NULL').all(username) as any[]
 
   // Calculate stats
   const total_trades = closedPositions.length
@@ -338,7 +365,10 @@ app.get('/api/player/:address/stats', (req, res) => {
     : 0
 
   res.json({
-    address: player.address,
+    farcaster_username: player.farcaster_username,
+    farcaster_fid: player.farcaster_fid,
+    display_name: player.display_name,
+    pfp_url: player.pfp_url,
     cash: player.cash,
     high_score: player.high_score,
     created_at: player.created_at,
@@ -354,29 +384,29 @@ app.get('/api/player/:address/stats', (req, res) => {
 })
 
 // Submit cash to leaderboard
-app.post('/api/player/:address/submit', (req, res) => {
-  const address = req.params.address
+app.post('/api/player/:username/submit', (req, res) => {
+  const username = req.params.username
   const { cash } = req.body
 
   // Get all players with submitted cash
-  const allPlayers = db.prepare('SELECT address, submitted_cash FROM players').all() as { address: string, submitted_cash: number }[]
+  const allPlayers = db.prepare('SELECT farcaster_username, submitted_cash FROM players').all() as { farcaster_username: string, submitted_cash: number }[]
 
   // Calculate rank based on submitted cash
   const { rank, position } = calculateRank(cash, allPlayers)
 
   // Update player's submitted cash and rank
-  db.prepare('UPDATE players SET submitted_cash = ?, rank = ?, updated_at = ? WHERE address = ?').run(
+  db.prepare('UPDATE players SET submitted_cash = ?, rank = ?, updated_at = ? WHERE farcaster_username = ?').run(
     cash,
     rank,
     Date.now(),
-    address
+    username
   )
 
   // Recalculate ranks for all players
-  const updatedPlayers = db.prepare('SELECT address, submitted_cash FROM players WHERE submitted_cash > 0').all() as { address: string, submitted_cash: number }[]
+  const updatedPlayers = db.prepare('SELECT farcaster_username, submitted_cash FROM players WHERE submitted_cash > 0').all() as { farcaster_username: string, submitted_cash: number }[]
   updatedPlayers.forEach((player) => {
     const { rank: newRank } = calculateRank(player.submitted_cash, updatedPlayers)
-    db.prepare('UPDATE players SET rank = ? WHERE address = ?').run(newRank, player.address)
+    db.prepare('UPDATE players SET rank = ? WHERE farcaster_username = ?').run(newRank, player.farcaster_username)
   })
 
   res.json({ success: true, rank, position })
@@ -384,7 +414,7 @@ app.post('/api/player/:address/submit', (req, res) => {
 
 // Leaderboard
 app.get('/api/leaderboard', (req, res) => {
-  const leaderboard = db.prepare('SELECT address, submitted_cash as high_score, rank FROM players WHERE submitted_cash > 0 ORDER BY submitted_cash DESC LIMIT 100').all()
+  const leaderboard = db.prepare('SELECT farcaster_username, display_name, pfp_url, submitted_cash as high_score, rank FROM players WHERE submitted_cash > 0 ORDER BY submitted_cash DESC LIMIT 100').all()
   res.json(leaderboard)
 })
 

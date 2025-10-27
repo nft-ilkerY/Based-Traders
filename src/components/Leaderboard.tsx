@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
+import FarcasterAuth from './FarcasterAuth'
 
 interface LeaderboardEntry {
-  address: string
+  farcaster_username: string
+  display_name?: string
+  pfp_url?: string
   high_score: number
+  rank: string
 }
 
 export default function Leaderboard() {
@@ -61,7 +64,7 @@ export default function Leaderboard() {
             <p className="text-gray-400 text-sm mt-1">Real-time Trading on Base Chain</p>
           </div>
         </div>
-        <ConnectButton />
+        <FarcasterAuth />
       </header>
 
       <div className="max-w-5xl mx-auto">
@@ -109,7 +112,7 @@ export default function Leaderboard() {
 
                     return (
                       <tr
-                        key={entry.address}
+                        key={entry.farcaster_username}
                         className={`border-b border-gray-800/50 hover:bg-gradient-to-r hover:from-[#0000FF]/5 hover:to-transparent transition-all duration-300 ${
                           isTopThree ? 'bg-gradient-to-r from-[#0000FF]/10 to-transparent' : ''
                         }`}
@@ -120,8 +123,26 @@ export default function Leaderboard() {
                           </div>
                         </td>
                         <td className="py-5">
-                          <div className="font-mono text-sm text-gray-300">
-                            {entry.address.slice(0, 6)}...{entry.address.slice(-4)}
+                          <div className="flex items-center gap-3">
+                            {entry.pfp_url ? (
+                              <img
+                                src={entry.pfp_url}
+                                alt={entry.farcaster_username}
+                                className="w-10 h-10 rounded-lg"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 bg-gradient-to-br from-[#0000FF] to-[#0000AA] rounded-lg flex items-center justify-center text-lg">
+                                👤
+                              </div>
+                            )}
+                            <div>
+                              <div className="text-sm font-bold text-white">
+                                {entry.display_name || '@' + entry.farcaster_username}
+                              </div>
+                              <div className="text-xs text-purple-400">
+                                @{entry.farcaster_username}
+                              </div>
+                            </div>
                           </div>
                         </td>
                         <td className="py-5 text-right">

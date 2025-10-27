@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
-import { useAccount } from 'wagmi'
+import { useProfile } from '@farcaster/auth-kit'
 import { gameState } from '../lib/gameState'
 import FarcasterAuth from './FarcasterAuth'
 
 interface ProfileStats {
-  address: string
+  farcaster_username: string
+  farcaster_fid: number
+  display_name?: string
+  pfp_url?: string
   cash: number
   high_score: number
   created_at: number
@@ -32,40 +35,40 @@ interface Trade {
 }
 
 export default function Profile() {
-  const { address, isConnected } = useAccount()
+  const { isAuthenticated, profile } = useProfile()
   const [stats, setStats] = useState<ProfileStats | null>(null)
   const [trades, setTrades] = useState<Trade[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (isConnected && address) {
+    if (isAuthenticated && profile?.username) {
       // Initialize player first
-      gameState.initPlayer(address).then(() => {
+      gameState.initPlayer(profile.username).then(() => {
         loadProfileData()
       })
 
       // Reload every 5 seconds to stay in sync
       const interval = setInterval(() => {
-        if (address) loadProfileData()
+        if (profile?.username) loadProfileData()
       }, 5000)
 
       return () => clearInterval(interval)
     }
-  }, [isConnected, address])
+  }, [isAuthenticated, profile?.username])
 
   const loadProfileData = async () => {
-    if (!address) return
+    if (!profile?.username) return
 
     try {
-      console.log('Loading profile for:', address)
+      console.log('Loading profile for:', profile.username)
 
       // Get current player state from memory
-      const playerState = gameState.getPlayerState(address)
+      const playerState = gameState.getPlayerState(profile.username)
       console.log('Player state from memory:', playerState)
 
       if (!playerState) {
         console.log('No player state found, initializing...')
-        await gameState.initPlayer(address)
+        await gameState.initPlayer(profile.username)
         setTimeout(loadProfileData, 100)
         return
       }
@@ -76,8 +79,8 @@ export default function Profile() {
 
       try {
         const [statsRes, tradesRes] = await Promise.all([
-          fetch(`http://localhost:3002/api/player/${address}/stats`),
-          fetch(`http://localhost:3002/api/positions/${address}/closed`)
+          fetch(`http://localhost:3002/api/player/${profile.username}/stats`),
+          fetch(`http://localhost:3002/api/positions/${profile.username}/closed`)
         ])
 
         console.log('Stats response status:', statsRes.status)
@@ -122,7 +125,10 @@ export default function Profile() {
 
       // Always use current player state values
       const finalStats: ProfileStats = {
-        address: playerState.address,
+        farcaster_username: playerState.username,
+        farcaster_fid: statsData?.farcaster_fid || profile?.fid || 0,
+        display_name: statsData?.display_name || profile?.displayName,
+        pfp_url: statsData?.pfp_url || profile?.pfpUrl,
         cash: playerState.cash,
         high_score: Math.max(statsData?.high_score || 0, playerState.totalValue),
         created_at: statsData?.created_at || Date.now(),
@@ -206,7 +212,7 @@ export default function Profile() {
         <FarcasterAuth />
       </header>
 
-      {!isConnected ? (
+      {!isAuthenticated ? (
         <div className="max-w-2xl mx-auto mt-20 text-center">
           <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-3xl p-12 border border-gray-700/50 relative overflow-hidden backdrop-blur-xl shadow-2xl shadow-[#0000FF]/10">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#0000FF] opacity-10 rounded-full blur-3xl animate-pulse"></div>
@@ -214,9 +220,9 @@ export default function Profile() {
               <div className="w-20 h-20 bg-gradient-to-br from-[#0000FF] to-[#0000AA] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#0000FF]/30">
                 <span className="text-4xl">👤</span>
               </div>
-              <h2 className="text-4xl font-bold mb-4">Connect Wallet</h2>
+              <h2 className="text-4xl font-bold mb-4">Sign in with Farcaster</h2>
               <p className="text-gray-300 text-lg mb-8">
-                Connect your wallet to view your profile and trading statistics
+                Sign in with Farcaster to view your profile and trading statistics
               </p>
             </div>
           </div>
@@ -233,13 +239,23 @@ export default function Profile() {
 
             <div className="relative z-10">
               <div className="flex items-center gap-6 mb-4">
-                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#0000FF] to-[#0000AA] flex items-center justify-center text-5xl shadow-lg shadow-[#0000FF]/30">
-                  👤
-                </div>
+                {stats?.pfp_url ? (
+                  <img
+                    src={stats.pfp_url}
+                    alt={stats.farcaster_username}
+                    className="w-24 h-24 rounded-2xl shadow-lg shadow-[#0000FF]/30"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#0000FF] to-[#0000AA] flex items-center justify-center text-5xl shadow-lg shadow-[#0000FF]/30">
+                    👤
+                  </div>
+                )}
                 <div>
-                  <h2 className="text-3xl font-bold mb-2">Trader Profile</h2>
-                  <p className="text-sm text-gray-400 font-mono bg-[#0a0c12]/50 px-3 py-1 rounded-lg inline-block">
-                    {address?.slice(0, 6)}...{address?.slice(-4)}
+                  <h2 className="text-3xl font-bold mb-2">
+                    {stats?.display_name || '@' + stats?.farcaster_username}
+                  </h2>
+                  <p className="text-sm text-purple-400 bg-[#0a0c12]/50 px-3 py-1 rounded-lg inline-block">
+                    @{stats?.farcaster_username}
                   </p>
                   <p className="text-xs text-gray-500 mt-2">
                     ⏰ Member since {stats ? formatDate(stats.created_at) : 'N/A'}

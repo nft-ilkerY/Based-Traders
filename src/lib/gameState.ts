@@ -16,7 +16,7 @@ export interface Position {
 }
 
 export interface PlayerState {
-  address: string
+  username: string
   cash: number
   positions: Position[]
   totalValue: number
@@ -46,54 +46,68 @@ export class GameState {
   private listeners: Set<(state: PlayerState) => void> = new Set()
 
   // Initialize player or get existing state
-  async initPlayer(address: string): Promise<PlayerState> {
-    if (!playerStates.has(address)) {
+  async initPlayer(username: string): Promise<PlayerState> {
+    if (!playerStates.has(username)) {
       // Fetch from database
       try {
-        const response = await fetch(`${API_BASE}/player/${address}`)
+        const response = await fetch(`${API_BASE}/player/${username}`)
         const data = await response.json()
 
+        if (!data) {
+          // Player doesn't exist yet
+          const initialState: PlayerState = {
+            username,
+            cash: INITIAL_CASH,
+            positions: [],
+            totalValue: INITIAL_CASH,
+            pnl: 0,
+            pnlPercent: 0,
+          }
+          playerStates.set(username, initialState)
+          return initialState
+        }
+
         const initialState: PlayerState = {
-          address,
+          username,
           cash: data.cash || INITIAL_CASH,
           positions: [],
           totalValue: data.cash || INITIAL_CASH,
           pnl: 0,
           pnlPercent: 0,
         }
-        playerStates.set(address, initialState)
+        playerStates.set(username, initialState)
         return initialState
       } catch (error) {
         console.error('Failed to fetch player data:', error)
         // Fallback to local state
         const initialState: PlayerState = {
-          address,
+          username,
           cash: INITIAL_CASH,
           positions: [],
           totalValue: INITIAL_CASH,
           pnl: 0,
           pnlPercent: 0,
         }
-        playerStates.set(address, initialState)
+        playerStates.set(username, initialState)
         return initialState
       }
     }
-    return playerStates.get(address)!
+    return playerStates.get(username)!
   }
 
-  getPlayerState(address: string): PlayerState | undefined {
-    return playerStates.get(address)
+  getPlayerState(username: string): PlayerState | undefined {
+    return playerStates.get(username)
   }
 
   async openPosition(
-    address: string,
+    username: string,
     amount: number,
     leverage: number,
     type: 'LONG' | 'SHORT',
     currentPrice: number,
     token: string = 'BATR' // Default token for now
   ): Promise<{ success: boolean; error?: string }> {
-    const state = playerStates.get(address)
+    const state = playerStates.get(username)
     if (!state) {
       return { success: false, error: 'Player not initialized' }
     }
@@ -160,7 +174,7 @@ export class GameState {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: position.id,
-          player_address: address,
+          player_username: username,
           type: position.type,
           entry_price: position.entryPrice,
           leverage: position.leverage,
@@ -170,7 +184,7 @@ export class GameState {
       })
 
       // Update player cash in database
-      await fetch(`${API_BASE}/player/${address}/update`, {
+      await fetch(`${API_BASE}/player/${username}/update`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -185,8 +199,8 @@ export class GameState {
     return { success: true }
   }
 
-  async closePosition(address: string, positionId: string): Promise<{ success: boolean; error?: string }> {
-    const state = playerStates.get(address)
+  async closePosition(username: string, positionId: string): Promise<{ success: boolean; error?: string }> {
+    const state = playerStates.get(username)
     if (!state) {
       return { success: false, error: 'Player not initialized' }
     }
@@ -237,7 +251,7 @@ export class GameState {
       })
 
       // Update player cash and high score
-      await fetch(`${API_BASE}/player/${address}/update`, {
+      await fetch(`${API_BASE}/player/${username}/update`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -252,8 +266,8 @@ export class GameState {
     return { success: true }
   }
 
-  updatePrices(address: string, currentPrice: number) {
-    const state = playerStates.get(address)
+  updatePrices(username: string, currentPrice: number) {
+    const state = playerStates.get(username)
     if (!state) return
 
     const now = Date.now()
@@ -327,7 +341,7 @@ export class GameState {
           })
 
           // Update player cash in database
-          await fetch(`${API_BASE}/player/${address}/update`, {
+          await fetch(`${API_BASE}/player/${username}/update`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -341,7 +355,7 @@ export class GameState {
       })
 
       setTimeout(() => {
-        const currentState = playerStates.get(address)
+        const currentState = playerStates.get(username)
         if (currentState) {
           currentState.positions = currentState.positions.filter(p => !p.isLiquidated)
           this.updateTotalValue(currentState)
