@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { SignInButton, useProfile } from '@farcaster/auth-kit'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
@@ -8,16 +8,32 @@ export default function FarcasterAuth() {
   const { connect, connectors } = useConnect()
   const { disconnect } = useDisconnect()
   const { isAuthenticated, profile } = useProfile()
+  const [isInFarcaster, setIsInFarcaster] = useState(false)
+
+  // Check if running inside Farcaster
+  useEffect(() => {
+    const checkFarcasterContext = () => {
+      // Check for Farcaster context indicators
+      const isFarcasterFrame = window.parent !== window
+      const hasFarcasterConnector = connectors.some(c => c.id === 'farcasterMiniApp')
+
+      setIsInFarcaster(isFarcasterFrame || hasFarcasterConnector)
+      console.log('Is in Farcaster:', isFarcasterFrame || hasFarcasterConnector)
+    }
+
+    checkFarcasterContext()
+  }, [connectors])
 
   // Auto-connect to Farcaster mini app if available
   useEffect(() => {
-    if (!isConnected) {
+    if (!isConnected && !isAuthenticated) {
       const farcasterConnector = connectors.find(c => c.id === 'farcasterMiniApp')
       if (farcasterConnector) {
+        console.log('Auto-connecting to Farcaster mini app...')
         connect({ connector: farcasterConnector })
       }
     }
-  }, [isConnected, connectors, connect])
+  }, [isConnected, isAuthenticated, connectors, connect])
 
   if (isAuthenticated && profile) {
     return (
@@ -60,6 +76,13 @@ export default function FarcasterAuth() {
 
   return (
     <div className="flex items-center gap-3">
+      {/* Show Farcaster context info */}
+      {isInFarcaster && !isAuthenticated && (
+        <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg px-4 py-2 text-sm text-purple-200">
+          Running in Farcaster - Click to connect
+        </div>
+      )}
+
       {/* Farcaster Sign In Button - using official component */}
       <SignInButton
         onSuccess={({ fid, username }) => {
@@ -70,7 +93,8 @@ export default function FarcasterAuth() {
         }}
       />
 
-      <ConnectButton />
+      {/* Only show ConnectButton if not in Farcaster or already connected */}
+      {(!isInFarcaster || isConnected) && <ConnectButton />}
     </div>
   )
 }
