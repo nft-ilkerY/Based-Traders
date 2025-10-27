@@ -86,7 +86,7 @@ export default function TradingInterface({ overrideProfile }: TradingInterfacePr
       setPriceHistory((prev) => {
         // Only add if different from last price
         if (prev.length === 0 || prev[prev.length - 1] !== price) {
-          return [...prev.slice(-119), price] // Keep last 120 prices
+          return [...prev.slice(-49), price] // Keep last 50 prices
         }
         return prev
       })
