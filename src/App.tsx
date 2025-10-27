@@ -13,6 +13,8 @@ const authKitConfig = {
   rpcUrl: 'https://mainnet.optimism.io',
   domain: window.location.host,
   siweUri: window.location.origin,
+  // Ensure session persistence
+  relay: 'https://relay.farcaster.xyz',
 }
 
 // Debug: Log configuration
@@ -22,6 +24,9 @@ function AppContent() {
   const { isAuthenticated, profile } = useProfile()
   const [currentPage, setCurrentPage] = useState<'home' | 'trading' | 'profile' | 'leaderboard'>('home')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  // Debug: Log authentication state changes
+  console.log('AppContent render - isAuthenticated:', isAuthenticated, 'profile:', profile)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#090a0f] via-[#0a0b10] to-[#0b0c11] text-white">

@@ -13,6 +13,7 @@ export default function TradingInterface() {
   const [priceHistory, setPriceHistory] = useState<number[]>([])
   const [playerState, setPlayerState] = useState<PlayerState | null>(null)
   const [historyLoaded, setHistoryLoaded] = useState(false)
+  const [playerLoading, setPlayerLoading] = useState(false)
 
   // Load price history on mount
   useEffect(() => {
@@ -34,6 +35,9 @@ export default function TradingInterface() {
   // Initialize player when Farcaster connects
   useEffect(() => {
     if (isAuthenticated && profile?.username) {
+      console.log('Initializing player:', profile.username)
+      setPlayerLoading(true)
+
       // Create player in database with Farcaster profile
       fetch('http://localhost:3002/api/player/create', {
         method: 'POST',
@@ -44,17 +48,26 @@ export default function TradingInterface() {
           displayName: profile.displayName,
           pfpUrl: profile.pfpUrl,
         }),
-      }).then(() => {
+      })
+      .then(response => response.json())
+      .then(() => {
         if (profile.username) {
-          gameState.initPlayer(profile.username).then(state => {
-            setPlayerState(state)
-          })
+          return gameState.initPlayer(profile.username)
         }
-      }).catch(error => {
-        console.error('Failed to create player:', error)
+      })
+      .then(state => {
+        if (state) {
+          console.log('Player state initialized:', state)
+          setPlayerState(state)
+        }
+        setPlayerLoading(false)
+      })
+      .catch(error => {
+        console.error('Failed to create/init player:', error)
+        setPlayerLoading(false)
       })
     }
-  }, [isAuthenticated, profile])
+  }, [isAuthenticated, profile?.username])
 
   // Subscribe to price updates
   useEffect(() => {
@@ -184,51 +197,52 @@ export default function TradingInterface() {
           </div>
 
           {/* Portfolio Stats - Compact */}
-          {playerState && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-xl p-3 border border-gray-700/50 backdrop-blur-sm">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-sm">💵</span>
-                  <p className="text-gray-400 text-xs font-medium">Cash</p>
-                </div>
-                <p className="text-lg font-bold">${playerState.cash.toFixed(2)}</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-xl p-3 border border-gray-700/50 backdrop-blur-sm">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-sm">💵</span>
+                <p className="text-gray-400 text-xs font-medium">Cash</p>
               </div>
-              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-xl p-3 border border-gray-700/50 backdrop-blur-sm">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-sm">💎</span>
-                  <p className="text-gray-400 text-xs font-medium">Total Value</p>
-                </div>
-                <p className="text-lg font-bold">${playerState.totalValue.toFixed(2)}</p>
-              </div>
-              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-xl p-3 border border-gray-700/50 backdrop-blur-sm">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-sm">{playerState.pnl >= 0 ? '📈' : '📉'}</span>
-                  <p className="text-gray-400 text-xs font-medium">P&L</p>
-                </div>
-                <p
-                  className={`text-lg font-bold ${
-                    playerState.pnl >= 0 ? 'text-green-400' : 'text-red-400'
-                  }`}
-                >
-                  {playerState.pnl >= 0 ? '+' : ''}${playerState.pnl.toFixed(2)}
-                </p>
-              </div>
-              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-xl p-3 border border-gray-700/50 backdrop-blur-sm">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-sm">⚡</span>
-                  <p className="text-gray-400 text-xs font-medium">P&L %</p>
-                </div>
-                <p
-                  className={`text-lg font-bold ${
-                    playerState.pnlPercent >= 0 ? 'text-green-400' : 'text-red-400'
-                  }`}
-                >
-                  {playerState.pnlPercent >= 0 ? '+' : ''}
-                  {playerState.pnlPercent.toFixed(2)}%
-                </p>
-              </div>
+              <p className="text-lg font-bold">
+                {playerLoading ? '...' : playerState ? `$${playerState.cash.toFixed(2)}` : '$1,000.00'}
+              </p>
             </div>
-          )}
+            <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-xl p-3 border border-gray-700/50 backdrop-blur-sm">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-sm">💎</span>
+                <p className="text-gray-400 text-xs font-medium">Total Value</p>
+              </div>
+              <p className="text-lg font-bold">
+                {playerLoading ? '...' : playerState ? `$${playerState.totalValue.toFixed(2)}` : '$1,000.00'}
+              </p>
+            </div>
+            <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-xl p-3 border border-gray-700/50 backdrop-blur-sm">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-sm">{playerState && playerState.pnl >= 0 ? '📈' : '📉'}</span>
+                <p className="text-gray-400 text-xs font-medium">P&L</p>
+              </div>
+              <p
+                className={`text-lg font-bold ${
+                  playerState && playerState.pnl >= 0 ? 'text-green-400' : 'text-red-400'
+                }`}
+              >
+                {playerLoading ? '...' : playerState ? `${playerState.pnl >= 0 ? '+' : ''}$${playerState.pnl.toFixed(2)}` : '$0.00'}
+              </p>
+            </div>
+            <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-xl p-3 border border-gray-700/50 backdrop-blur-sm">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-sm">⚡</span>
+                <p className="text-gray-400 text-xs font-medium">P&L %</p>
+              </div>
+              <p
+                className={`text-lg font-bold ${
+                  playerState && playerState.pnlPercent >= 0 ? 'text-green-400' : 'text-red-400'
+                }`}
+              >
+                {playerLoading ? '...' : playerState ? `${playerState.pnlPercent >= 0 ? '+' : ''}${playerState.pnlPercent.toFixed(2)}%` : '0.00%'}
+              </p>
+            </div>
+          </div>
 
           {/* Main Layout: Chart on Left, Controls on Right */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
