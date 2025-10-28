@@ -257,11 +257,11 @@ export default function TradingInterface({ overrideProfile }: TradingInterfacePr
             {/* Left Side: Chart (3/5 width on large screens) */}
             <div className="lg:col-span-3 space-y-4">
               {/* Chart */}
-              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-3xl p-6 border border-gray-700/50 relative overflow-hidden backdrop-blur-sm shadow-md shadow-[#0000FF]/3">
+              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-3xl overflow-hidden border border-gray-700/50 relative backdrop-blur-sm shadow-md shadow-[#0000FF]/3">
                 {/* Subtle decorative gradient */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-[#0000FF] opacity-[0.08] rounded-full blur-3xl pointer-events-none"></div>
 
-                <div className="flex justify-between items-center mb-6 relative z-10">
+                <div className="flex justify-between items-center p-4 md:p-6 relative z-10">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-[#0000FF] to-[#0000AA] rounded-lg flex items-center justify-center">
                       <span className="text-lg">📊</span>

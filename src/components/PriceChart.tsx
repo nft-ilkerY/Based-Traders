@@ -93,17 +93,24 @@ export default function PriceChart({ data }: PriceChartProps) {
               strokeWidth="1"
               vectorEffect="non-scaling-stroke"
             />
-            {/* Price label on top of grid line */}
+            {/* Price label background box (Binance style) */}
+            <rect
+              x={width - leftPadding - 65}
+              y={label.y - 12}
+              width="60"
+              height="20"
+              fill="rgba(30, 35, 45, 0.9)"
+              rx="3"
+            />
+            {/* Price label text */}
             <text
-              x={width - leftPadding - 10}
-              y={label.y - 5}
-              fill="rgba(255, 255, 255, 0.7)"
+              x={width - leftPadding - 35}
+              y={label.y + 3}
+              fill="rgba(255, 255, 255, 0.85)"
               fontSize="11"
               fontWeight="500"
               fontFamily="Arial, sans-serif"
-              letterSpacing="3"
-              textAnchor="end"
-              style={{ fontStretch: 'ultra-expanded', transform: 'scaleY(0.8)' }}
+              textAnchor="middle"
             >
               ${label.price.toFixed(2)}
             </text>
