@@ -98,10 +98,11 @@ export default function PriceChart({ data }: PriceChartProps) {
               x={width - rightPadding + 10}
               y={label.y + 5}
               fill="rgba(255, 255, 255, 0.7)"
-              fontSize="14"
-              fontWeight="500"
+              fontSize="16"
+              fontWeight="400"
               fontFamily="Helvetica, Arial, sans-serif"
-              letterSpacing="1"
+              letterSpacing="1.5"
+              style={{ fontStretch: 'expanded' }}
             >
               ${label.price.toFixed(2)}
             </text>
