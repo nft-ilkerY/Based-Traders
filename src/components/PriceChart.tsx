@@ -95,7 +95,7 @@ export default function PriceChart({ data }: PriceChartProps) {
             />
             {/* Price label background box (Binance style) */}
             <rect
-              x={width - leftPadding - 75}
+              x={width - 70}
               y={label.y - 14}
               width="70"
               height="24"
@@ -104,7 +104,7 @@ export default function PriceChart({ data }: PriceChartProps) {
             />
             {/* Price label text */}
             <text
-              x={width - leftPadding - 40}
+              x={width - 35}
               y={label.y + 4}
               fill="rgba(255, 255, 255, 0.95)"
               fontSize="13"
