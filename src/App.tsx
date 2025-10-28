@@ -46,9 +46,10 @@ function AppContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [restoredProfile, setRestoredProfile] = useState<any>(null)
   const [frameContext, setFrameContext] = useState<any>(null)
+  const [frameLoggedIn, setFrameLoggedIn] = useState(false)
 
   // Debug: Log authentication state changes
-  console.log('AppContent render - isAuthenticated:', isAuthenticated, 'profile:', profile, 'restored:', restoredProfile, 'frameContext:', frameContext)
+  console.log('AppContent render - isAuthenticated:', isAuthenticated, 'profile:', profile, 'restored:', restoredProfile, 'frameContext:', frameContext, 'frameLoggedIn:', frameLoggedIn)
 
   // Don't auto-login, just store frame context availability
   useEffect(() => {
@@ -102,9 +103,31 @@ function AppContent() {
     }
   }, [isAuthenticated, profile, restoredProfile])
 
+  // Handle frame login callback
+  const handleFrameLogin = (frameUser: any) => {
+    console.log('🎯 Frame login callback received:', frameUser)
+    const username = frameUser.username || frameUser.handle || frameUser.name || `user${frameUser.fid}`
+
+    const frameProfile = {
+      fid: frameUser.fid,
+      username: username,
+      displayName: frameUser.displayName,
+      pfpUrl: frameUser.pfpUrl,
+    }
+
+    // Save to session
+    sessionManager.save(frameProfile)
+
+    // Set as restored profile immediately
+    setRestoredProfile(frameProfile)
+    setFrameLoggedIn(true)
+
+    console.log('✅ Frame user logged in:', frameProfile)
+  }
+
   // Use AuthKit profile or restored profile (frameContext used only after sign in button)
   const activeProfile = profile || restoredProfile
-  const isLoggedIn = isAuthenticated || !!restoredProfile
+  const isLoggedIn = isAuthenticated || !!restoredProfile || frameLoggedIn
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#090a0f] via-[#0a0b10] to-[#0b0c11] text-white">
@@ -201,7 +224,7 @@ function AppContent() {
                   </span>
                 </div>
               ) : (
-                <FarcasterAuth />
+                <FarcasterAuth onFrameLogin={handleFrameLogin} />
               )}
             </div>
           </div>

@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
 import { SignInButton, useProfile } from '@farcaster/auth-kit'
 import sdk from '@farcaster/frame-sdk'
-import { sessionManager } from '../lib/sessionManager'
 
-export default function FarcasterAuth() {
+interface FarcasterAuthProps {
+  onFrameLogin?: (frameUser: any) => void
+}
+
+export default function FarcasterAuth({ onFrameLogin }: FarcasterAuthProps) {
   const { isAuthenticated, profile } = useProfile()
   const [frameContext, setFrameContext] = useState<any>(null)
 
@@ -26,30 +29,11 @@ export default function FarcasterAuth() {
     console.log('🔘 Sign in button clicked')
     console.log('📱 Frame context:', frameContext)
 
-    if (frameContext) {
-      // Extract username - it might be in different fields
-      const username = frameContext.username || frameContext.handle || frameContext.name || `user${frameContext.fid}`
-
-      console.log('✅ Signing in with Frame context:', {
-        fid: frameContext.fid,
-        username,
-        displayName: frameContext.displayName,
-        pfpUrl: frameContext.pfpUrl,
-      })
-
-      // Save frame context to session
-      sessionManager.save({
-        fid: frameContext.fid,
-        username: username,
-        displayName: frameContext.displayName,
-        pfpUrl: frameContext.pfpUrl,
-      })
-
-      console.log('💾 Session saved, reloading...')
-      // Reload page to trigger session restoration
-      window.location.reload()
+    if (frameContext && onFrameLogin) {
+      console.log('✅ Calling onFrameLogin with context')
+      onFrameLogin(frameContext)
     } else {
-      console.error('❌ No frame context available')
+      console.error('❌ No frame context or callback available', { frameContext, onFrameLogin })
     }
   }
 
