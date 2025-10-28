@@ -100,7 +100,7 @@ export default function PriceChart({ data }: PriceChartProps) {
               fill="rgba(255, 255, 255, 0.5)"
               fontSize="16"
               fontWeight="600"
-              fontFamily="system-ui, -apple-system, sans-serif"
+              fontFamily="Arial, sans-serif"
             >
               ${label.price.toFixed(2)}
             </text>
@@ -175,7 +175,7 @@ export default function PriceChart({ data }: PriceChartProps) {
               fill="white"
               fontSize="14"
               fontWeight="bold"
-              fontFamily="monospace"
+              fontFamily="Arial, sans-serif"
               textAnchor="middle"
             >
               ${hoveredPoint.price.toFixed(2)}
