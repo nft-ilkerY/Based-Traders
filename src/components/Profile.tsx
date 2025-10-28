@@ -86,8 +86,8 @@ export default function Profile({ overrideProfile }: ProfileProps = { overridePr
 
       try {
         const [statsRes, tradesRes] = await Promise.all([
-          fetch(`http://localhost:3002/api/player/${profile.username}/stats`),
-          fetch(`http://localhost:3002/api/positions/${profile.username}/closed`)
+          fetch(`/api/player/${profile.username}/stats`),
+          fetch(`/api/positions/${profile.username}/closed`)
         ])
 
         console.log('Stats response status:', statsRes.status)

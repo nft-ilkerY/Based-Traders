@@ -27,7 +27,7 @@ export default function TradingInterface({ overrideProfile }: TradingInterfacePr
   useEffect(() => {
     const loadHistory = async () => {
       try {
-        const response = await fetch('http://localhost:3002/api/price')
+        const response = await fetch('/api/price')
         const data = await response.json()
         setPriceHistory(data.history || [])
         setCurrentPrice(data.price)
@@ -48,7 +48,7 @@ export default function TradingInterface({ overrideProfile }: TradingInterfacePr
       setPlayerLoading(true)
 
       // Create player in database with Farcaster profile
-      fetch('http://localhost:3002/api/player/create', {
+      fetch('/api/player/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -22,7 +22,7 @@ export default function Leaderboard() {
 
   const loadLeaderboard = async () => {
     try {
-      const response = await fetch('http://localhost:3002/api/leaderboard')
+      const response = await fetch('/api/leaderboard')
       if (response.ok) {
         const data = await response.json()
         setLeaderboard(data)
