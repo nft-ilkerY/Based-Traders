@@ -10,30 +10,29 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [profile, setProfile] = useState<any>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isSDKLoaded, setIsSDKLoaded] = useState(false)
 
-  // Initialize SDK and get user context
+  // Initialize SDK
   useEffect(() => {
-    const initSDK = async () => {
-      try {
-        const context = await sdk.context
-        if (context?.user) {
-          const username = context.user.username || `user${context.user.fid}`
-          setProfile({
-            fid: context.user.fid,
-            username: username,
-            displayName: context.user.displayName,
-            pfpUrl: context.user.pfpUrl,
-          })
-          setIsAuthenticated(true)
-        }
-      } catch (error) {
-        // Not in mini app context
-        setIsAuthenticated(false)
+    const load = async () => {
+      const context = await sdk.context
+      setIsSDKLoaded(true)
+
+      if (context?.user) {
+        const username = context.user.username || `user${context.user.fid}`
+        setProfile({
+          fid: context.user.fid,
+          username: username,
+          displayName: context.user.displayName,
+          pfpUrl: context.user.pfpUrl,
+        })
+        setIsAuthenticated(true)
       }
+
+      sdk.actions.ready()
     }
 
-    initSDK()
-    sdk.actions.ready()
+    load()
   }, [])
 
   const handleAuth = async () => {
@@ -55,6 +54,14 @@ function App() {
   }
 
   const isLoggedIn = isAuthenticated && profile
+
+  if (!isSDKLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#090a0f] via-[#0a0b10] to-[#0b0c11] text-white flex items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#090a0f] via-[#0a0b10] to-[#0b0c11] text-white">
