@@ -95,9 +95,9 @@ export default function PriceChart({ data }: PriceChartProps) {
             />
             {/* Price label on top of grid line */}
             <text
-              x={width - leftPadding - 55}
+              x={width - leftPadding - 10}
               y={label.y - 5}
-              fill="rgba(255, 255, 255, 0.6)"
+              fill="rgba(255, 255, 255, 0.7)"
               fontSize="11"
               fontWeight="500"
               fontFamily="Arial, sans-serif"
