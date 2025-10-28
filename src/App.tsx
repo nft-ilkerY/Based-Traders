@@ -3,6 +3,7 @@ import { QueryClient } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { AuthKitProvider, useProfile } from '@farcaster/auth-kit'
+import sdk from '@farcaster/frame-sdk'
 import TradingInterface from './components/TradingInterface'
 import ProfileComponent from './components/Profile'
 import Leaderboard from './components/Leaderboard'
@@ -44,9 +45,38 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState<'home' | 'trading' | 'profile' | 'leaderboard'>('home')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [restoredProfile, setRestoredProfile] = useState<any>(null)
+  const [frameContext, setFrameContext] = useState<any>(null)
 
   // Debug: Log authentication state changes
-  console.log('AppContent render - isAuthenticated:', isAuthenticated, 'profile:', profile, 'restored:', restoredProfile)
+  console.log('AppContent render - isAuthenticated:', isAuthenticated, 'profile:', profile, 'restored:', restoredProfile, 'frameContext:', frameContext)
+
+  // Check for Farcaster Frame context (mobile app)
+  useEffect(() => {
+    const checkFrameContext = async () => {
+      try {
+        const context = await sdk.context
+        console.log('📱 Frame SDK Context:', context)
+        if (context?.user) {
+          setFrameContext({
+            fid: context.user.fid,
+            username: context.user.username,
+            displayName: context.user.displayName,
+            pfpUrl: context.user.pfpUrl,
+          })
+          // Save to session
+          sessionManager.save({
+            fid: context.user.fid,
+            username: context.user.username || '',
+            displayName: context.user.displayName,
+            pfpUrl: context.user.pfpUrl,
+          })
+        }
+      } catch (error) {
+        console.log('Not in Farcaster frame context:', error)
+      }
+    }
+    checkFrameContext()
+  }, [])
 
   // Save session when user authenticates
   useEffect(() => {
@@ -83,9 +113,9 @@ function AppContent() {
     }
   }, [isAuthenticated, profile, restoredProfile])
 
-  // Use restored profile if AuthKit profile is not available
-  const activeProfile = profile || restoredProfile
-  const isLoggedIn = isAuthenticated || !!restoredProfile
+  // Use frame context first (mobile app), then AuthKit profile, then restored profile
+  const activeProfile = frameContext || profile || restoredProfile
+  const isLoggedIn = !!frameContext || isAuthenticated || !!restoredProfile
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#090a0f] via-[#0a0b10] to-[#0b0c11] text-white">
