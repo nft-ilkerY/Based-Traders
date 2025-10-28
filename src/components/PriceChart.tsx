@@ -95,13 +95,13 @@ export default function PriceChart({ data }: PriceChartProps) {
             />
             {/* Price label on top of grid line */}
             <text
-              x={leftPadding + 5}
+              x={width - leftPadding - 55}
               y={label.y - 5}
-              fill="rgba(255, 255, 255, 0.8)"
-              fontSize="11"
-              fontWeight="600"
+              fill="rgba(255, 255, 255, 0.3)"
+              fontSize="13"
+              fontWeight="500"
               fontFamily="Helvetica, Arial, sans-serif"
-              letterSpacing="0.3"
+              letterSpacing="0.5"
             >
               ${label.price.toFixed(2)}
             </text>
