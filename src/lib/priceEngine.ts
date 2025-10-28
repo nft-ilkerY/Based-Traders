@@ -11,7 +11,10 @@ class PriceEngine {
 
   private connect() {
     try {
-      this.ws = new WebSocket('ws://localhost:3002')
+      // Use relative WebSocket URL based on current location
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      const wsUrl = `${protocol}//${window.location.host}/ws`
+      this.ws = new WebSocket(wsUrl)
 
       this.ws.onopen = () => {
         console.log('✅ Connected to price server')

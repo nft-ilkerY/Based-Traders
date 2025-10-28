@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename)
 
 const app = express()
 const server = createServer(app)
-const wss = new WebSocketServer({ server })
+const wss = new WebSocketServer({ server, path: '/ws' })
 
 // CORS - only for development
 const isDev = process.env.NODE_ENV !== 'production'
