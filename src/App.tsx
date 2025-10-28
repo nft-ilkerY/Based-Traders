@@ -1,7 +1,4 @@
 import { useState, useEffect } from 'react'
-import { QueryClient } from '@tanstack/react-query'
-import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { AuthKitProvider, useProfile } from '@farcaster/auth-kit'
 import TradingInterface from './components/TradingInterface'
 import ProfileComponent from './components/Profile'
@@ -9,23 +6,6 @@ import Leaderboard from './components/Leaderboard'
 import FarcasterAuth from './components/FarcasterAuth'
 import { sessionManager } from './lib/sessionManager'
 import '@farcaster/auth-kit/styles.css'
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours
-      staleTime: 1000 * 60 * 60, // 1 hour
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
-      retry: 1,
-    },
-  },
-})
-
-const persister = createSyncStoragePersister({
-  storage: window.localStorage,
-  key: 'FARCASTER_AUTH_CACHE',
-})
 
 const authKitConfig = {
   rpcUrl: 'https://mainnet.optimism.io',
@@ -280,16 +260,9 @@ function AppContent() {
 
 function App() {
   return (
-    <PersistQueryClientProvider
-      client={queryClient}
-      persistOptions={{
-        persister,
-      }}
-    >
-      <AuthKitProvider config={authKitConfig}>
-        <AppContent />
-      </AuthKitProvider>
-    </PersistQueryClientProvider>
+    <AuthKitProvider config={authKitConfig}>
+      <AppContent />
+    </AuthKitProvider>
   )
 }
 
