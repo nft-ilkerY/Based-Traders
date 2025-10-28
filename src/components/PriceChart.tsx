@@ -28,11 +28,11 @@ export default function PriceChart({ data }: PriceChartProps) {
 
   // Add padding to prevent clipping
   const padding = 20
-  const rightPadding = 60 // Extra padding for Y-axis labels
+  const leftPadding = 10 // Small left padding
 
   // Generate SVG path with padding
   const points = data.map((price, index) => {
-    const x = (index / (data.length - 1)) * (width - rightPadding)
+    const x = leftPadding + (index / (data.length - 1)) * (width - leftPadding * 2)
     const y = padding + ((max - price) / range) * (height - padding * 2)
     return { x, y, price, index }
   })
@@ -85,24 +85,23 @@ export default function PriceChart({ data }: PriceChartProps) {
           <g key={i}>
             {/* Grid line */}
             <line
-              x1="0"
+              x1={leftPadding}
               y1={label.y}
-              x2={width - rightPadding}
+              x2={width - leftPadding}
               y2={label.y}
               stroke="rgba(255, 255, 255, 0.05)"
               strokeWidth="1"
               vectorEffect="non-scaling-stroke"
             />
-            {/* Price label */}
+            {/* Price label on top of grid line */}
             <text
-              x={width - rightPadding + 10}
-              y={label.y + 5}
-              fill="rgba(255, 255, 255, 0.7)"
-              fontSize="16"
-              fontWeight="400"
+              x={leftPadding + 5}
+              y={label.y - 5}
+              fill="rgba(255, 255, 255, 0.8)"
+              fontSize="11"
+              fontWeight="600"
               fontFamily="Helvetica, Arial, sans-serif"
-              letterSpacing="1.5"
-              style={{ fontStretch: 'expanded' }}
+              letterSpacing="0.3"
             >
               ${label.price.toFixed(2)}
             </text>
@@ -111,7 +110,7 @@ export default function PriceChart({ data }: PriceChartProps) {
 
         {/* Fill area */}
         <path
-          d={`${pathData} L ${width - rightPadding},${height - padding} L 0,${height - padding} Z`}
+          d={`${pathData} L ${width - leftPadding},${height - padding} L ${leftPadding},${height - padding} Z`}
           fill={fillColor}
         />
 
@@ -140,9 +139,9 @@ export default function PriceChart({ data }: PriceChartProps) {
             />
             {/* Horizontal line */}
             <line
-              x1="0"
+              x1={leftPadding}
               y1={hoveredPoint.y}
-              x2={width - rightPadding}
+              x2={width - leftPadding}
               y2={hoveredPoint.y}
               stroke="rgba(255, 255, 255, 0.3)"
               strokeWidth="1"
