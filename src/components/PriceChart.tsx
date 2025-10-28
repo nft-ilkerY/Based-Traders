@@ -97,11 +97,11 @@ export default function PriceChart({ data }: PriceChartProps) {
             <text
               x={width - rightPadding + 10}
               y={label.y + 5}
-              fill="rgba(255, 255, 255, 0.6)"
-              fontSize="12"
-              fontWeight="600"
-              fontFamily="Segoe UI, Tahoma, sans-serif"
-              letterSpacing="0.5"
+              fill="rgba(255, 255, 255, 0.7)"
+              fontSize="14"
+              fontWeight="500"
+              fontFamily="Helvetica, Arial, sans-serif"
+              letterSpacing="1"
             >
               ${label.price.toFixed(2)}
             </text>
@@ -174,11 +174,11 @@ export default function PriceChart({ data }: PriceChartProps) {
               x={hoveredPoint.x}
               y={hoveredPoint.y - 18}
               fill="white"
-              fontSize="13"
-              fontWeight="600"
-              fontFamily="Segoe UI, Tahoma, sans-serif"
+              fontSize="14"
+              fontWeight="500"
+              fontFamily="Helvetica, Arial, sans-serif"
               textAnchor="middle"
-              letterSpacing="0.5"
+              letterSpacing="1"
             >
               ${hoveredPoint.price.toFixed(2)}
             </text>
