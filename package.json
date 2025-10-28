@@ -12,8 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@farcaster/auth-kit": "^0.8.1",
-    "@farcaster/frame-sdk": "^0.0.64",
+    "@farcaster/miniapp-sdk": "^0.2.1",
     "better-sqlite3": "^12.4.1",
     "cors": "^2.8.5",
     "express": "^5.1.0",

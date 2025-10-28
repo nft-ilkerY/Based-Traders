@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useProfile } from '@farcaster/auth-kit'
 import { priceEngine } from '../lib/priceEngine'
 import { gameState } from '../lib/gameState'
 import type { PlayerState } from '../lib/gameState'
@@ -8,15 +7,11 @@ import PositionRow from './PositionRow'
 import TradingControls from './TradingControls'
 
 interface TradingInterfaceProps {
-  overrideProfile?: any
+  profile: any
+  isLoggedIn: boolean
 }
 
-export default function TradingInterface({ overrideProfile }: TradingInterfaceProps) {
-  const { isAuthenticated, profile: authKitProfile } = useProfile()
-
-  // Use override profile if provided (for restored sessions), otherwise use AuthKit profile
-  const profile = overrideProfile || authKitProfile
-  const isLoggedIn = isAuthenticated || !!overrideProfile
+export default function TradingInterface({ profile, isLoggedIn }: TradingInterfaceProps) {
   const [currentPrice, setCurrentPrice] = useState(100)
   const [priceHistory, setPriceHistory] = useState<number[]>([])
   const [playerState, setPlayerState] = useState<PlayerState | null>(null)

@@ -1,79 +1,60 @@
 import { useState, useEffect } from 'react'
-import { AuthKitProvider, useProfile } from '@farcaster/auth-kit'
+import sdk from '@farcaster/miniapp-sdk'
 import TradingInterface from './components/TradingInterface'
 import ProfileComponent from './components/Profile'
 import Leaderboard from './components/Leaderboard'
 import FarcasterAuth from './components/FarcasterAuth'
-import { sessionManager } from './lib/sessionManager'
-import '@farcaster/auth-kit/styles.css'
 
-const authKitConfig = {
-  rpcUrl: 'https://mainnet.optimism.io',
-  domain: window.location.hostname,
-  siweUri: window.location.origin,
-  relay: 'https://relay.farcaster.xyz',
-}
-
-function AppContent() {
-  const { isAuthenticated, profile } = useProfile()
+function App() {
   const [currentPage, setCurrentPage] = useState<'home' | 'trading' | 'profile' | 'leaderboard'>('home')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [restoredProfile, setRestoredProfile] = useState<any>(null)
-  const [frameLoggedIn, setFrameLoggedIn] = useState(false)
+  const [profile, setProfile] = useState<any>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  // Save session when user authenticates
+  // Initialize SDK and get user context
   useEffect(() => {
-    if (isAuthenticated && profile) {
-      sessionManager.save({
-        fid: profile.fid || 0,
-        username: profile.username || '',
-        displayName: profile.displayName,
-        pfpUrl: profile.pfpUrl,
-        bio: profile.bio,
-        custody: profile.custody,
-        verifications: profile.verifications,
-      })
-    }
-  }, [isAuthenticated, profile])
-
-  // Restore session on mount
-  useEffect(() => {
-    if (!isAuthenticated && !profile) {
-      const savedSession = sessionManager.load()
-      if (savedSession) {
-        setRestoredProfile(savedSession as any)
+    const initSDK = async () => {
+      try {
+        const context = await sdk.context
+        if (context?.user) {
+          const username = context.user.username || `user${context.user.fid}`
+          setProfile({
+            fid: context.user.fid,
+            username: username,
+            displayName: context.user.displayName,
+            pfpUrl: context.user.pfpUrl,
+          })
+          setIsAuthenticated(true)
+        }
+      } catch (error) {
+        // Not in mini app context
+        setIsAuthenticated(false)
       }
     }
-  }, [isAuthenticated, profile])
 
-  // Clear session on explicit logout
-  useEffect(() => {
-    if (!isAuthenticated && !profile && restoredProfile) {
-      // User explicitly logged out
-      sessionManager.clear()
-      setRestoredProfile(null)
+    initSDK()
+    sdk.actions.ready()
+  }, [])
+
+  const handleAuth = async () => {
+    try {
+      const context = await sdk.context
+      if (context?.user) {
+        const username = context.user.username || `user${context.user.fid}`
+        setProfile({
+          fid: context.user.fid,
+          username: username,
+          displayName: context.user.displayName,
+          pfpUrl: context.user.pfpUrl,
+        })
+        setIsAuthenticated(true)
+      }
+    } catch (error) {
+      // Handle error
     }
-  }, [isAuthenticated, profile, restoredProfile])
-
-  // Handle frame login callback
-  const handleFrameLogin = (frameUser: any) => {
-    const username = frameUser.username || frameUser.handle || frameUser.name || `user${frameUser.fid}`
-
-    const frameProfile = {
-      fid: frameUser.fid,
-      username: username,
-      displayName: frameUser.displayName,
-      pfpUrl: frameUser.pfpUrl,
-    }
-
-    sessionManager.save(frameProfile)
-    setRestoredProfile(frameProfile)
-    setFrameLoggedIn(true)
   }
 
-  // Use AuthKit profile or restored profile (frameContext used only after sign in button)
-  const activeProfile = profile || restoredProfile
-  const isLoggedIn = isAuthenticated || !!restoredProfile || frameLoggedIn
+  const isLoggedIn = isAuthenticated && profile
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#090a0f] via-[#0a0b10] to-[#0b0c11] text-white">
@@ -156,21 +137,21 @@ function AppContent() {
 
             {/* Right side - Auth */}
             <div className="flex items-center gap-3">
-              {isLoggedIn && activeProfile ? (
+              {isLoggedIn && profile ? (
                 <div className="flex items-center gap-2 bg-gradient-to-br from-[#8a63d2] to-[#6a4bb5] px-2 py-1 rounded-lg border border-purple-400/30 lg:px-3 lg:py-2">
-                  {activeProfile.pfpUrl && (
+                  {profile.pfpUrl && (
                     <img
-                      src={activeProfile.pfpUrl}
-                      alt={activeProfile.username}
+                      src={profile.pfpUrl}
+                      alt={profile.username}
                       className="w-6 h-6 rounded-full lg:w-7 lg:h-7"
                     />
                   )}
                   <span className="text-xs font-semibold text-white hidden sm:inline lg:text-sm">
-                    @{activeProfile.username}
+                    @{profile.username}
                   </span>
                 </div>
               ) : (
-                <FarcasterAuth onFrameLogin={handleFrameLogin} />
+                <FarcasterAuth onAuth={handleAuth} />
               )}
             </div>
           </div>
@@ -244,25 +225,17 @@ function AppContent() {
         </div>
       )}
 
-      {/* Page Content - Pass restored profile to components */}
+      {/* Page Content */}
       {!isLoggedIn || currentPage === 'home' ? (
-        <TradingInterface overrideProfile={restoredProfile} />
+        <TradingInterface profile={profile} isLoggedIn={isLoggedIn} />
       ) : currentPage === 'trading' ? (
-        <TradingInterface overrideProfile={restoredProfile} />
+        <TradingInterface profile={profile} isLoggedIn={isLoggedIn} />
       ) : currentPage === 'profile' ? (
-        <ProfileComponent overrideProfile={restoredProfile} />
+        <ProfileComponent profile={profile} isLoggedIn={isLoggedIn} />
       ) : (
         <Leaderboard />
       )}
     </div>
-  )
-}
-
-function App() {
-  return (
-    <AuthKitProvider config={authKitConfig}>
-      <AppContent />
-    </AuthKitProvider>
   )
 }
 

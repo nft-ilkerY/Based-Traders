@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useProfile } from '@farcaster/auth-kit'
 import { gameState } from '../lib/gameState'
 
 interface ProfileProps {
-  overrideProfile?: any
+  profile: any
+  isLoggedIn: boolean
 }
 
 interface ProfileStats {
@@ -37,12 +37,7 @@ interface Trade {
   is_liquidated: boolean
 }
 
-export default function Profile({ overrideProfile }: ProfileProps = { overrideProfile: undefined }) {
-  const { isAuthenticated, profile: authKitProfile } = useProfile()
-
-  // Use override profile if provided (for restored sessions), otherwise use AuthKit profile
-  const profile = overrideProfile || authKitProfile
-  const isLoggedIn = isAuthenticated || !!overrideProfile
+export default function Profile({ profile, isLoggedIn }: ProfileProps) {
   const [stats, setStats] = useState<ProfileStats | null>(null)
   const [trades, setTrades] = useState<Trade[]>([])
   const [loading, setLoading] = useState(true)
