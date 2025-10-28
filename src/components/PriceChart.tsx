@@ -95,22 +95,23 @@ export default function PriceChart({ data }: PriceChartProps) {
             />
             {/* Price label background box (Binance style) */}
             <rect
-              x={width - leftPadding - 65}
-              y={label.y - 12}
-              width="60"
-              height="20"
-              fill="rgba(30, 35, 45, 0.9)"
-              rx="3"
+              x={width - leftPadding - 75}
+              y={label.y - 14}
+              width="70"
+              height="24"
+              fill="rgba(30, 35, 45, 0.95)"
+              rx="4"
             />
             {/* Price label text */}
             <text
-              x={width - leftPadding - 35}
-              y={label.y + 3}
-              fill="rgba(255, 255, 255, 0.85)"
-              fontSize="11"
-              fontWeight="500"
+              x={width - leftPadding - 40}
+              y={label.y + 4}
+              fill="rgba(255, 255, 255, 0.95)"
+              fontSize="13"
+              fontWeight="600"
               fontFamily="Arial, sans-serif"
               textAnchor="middle"
+              letterSpacing="0.3"
             >
               ${label.price.toFixed(2)}
             </text>

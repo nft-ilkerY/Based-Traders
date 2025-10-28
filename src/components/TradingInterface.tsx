@@ -257,7 +257,7 @@ export default function TradingInterface({ overrideProfile }: TradingInterfacePr
             {/* Left Side: Chart (3/5 width on large screens) */}
             <div className="lg:col-span-3 space-y-4">
               {/* Chart */}
-              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-3xl overflow-hidden border border-gray-700/50 relative backdrop-blur-sm shadow-md shadow-[#0000FF]/3">
+              <div className="bg-gradient-to-br from-[#0f1117] to-[#0a0c12] rounded-none md:rounded-3xl overflow-hidden border-0 md:border md:border-gray-700/50 relative backdrop-blur-sm shadow-md shadow-[#0000FF]/3">
                 {/* Subtle decorative gradient */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-[#0000FF] opacity-[0.08] rounded-full blur-3xl pointer-events-none"></div>
 
