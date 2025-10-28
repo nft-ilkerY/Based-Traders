@@ -23,17 +23,33 @@ export default function FarcasterAuth() {
   }, [])
 
   const handleFrameSignIn = () => {
+    console.log('🔘 Sign in button clicked')
+    console.log('📱 Frame context:', frameContext)
+
     if (frameContext) {
-      console.log('📱 Signing in with Frame context:', frameContext)
-      // Save frame context to session
-      sessionManager.save({
+      // Extract username - it might be in different fields
+      const username = frameContext.username || frameContext.handle || frameContext.name || `user${frameContext.fid}`
+
+      console.log('✅ Signing in with Frame context:', {
         fid: frameContext.fid,
-        username: frameContext.username || '',
+        username,
         displayName: frameContext.displayName,
         pfpUrl: frameContext.pfpUrl,
       })
+
+      // Save frame context to session
+      sessionManager.save({
+        fid: frameContext.fid,
+        username: username,
+        displayName: frameContext.displayName,
+        pfpUrl: frameContext.pfpUrl,
+      })
+
+      console.log('💾 Session saved, reloading...')
       // Reload page to trigger session restoration
       window.location.reload()
+    } else {
+      console.error('❌ No frame context available')
     }
   }
 
@@ -63,13 +79,20 @@ export default function FarcasterAuth() {
 
   // If in Farcaster app, show simple sign in button
   if (frameContext) {
+    console.log('🎨 Rendering Farcaster sign in button, context:', frameContext)
     return (
-      <button
-        onClick={handleFrameSignIn}
-        className="bg-[#8a63d2] hover:bg-[#7a53c2] text-white font-semibold py-2 px-4 rounded-xl transition-colors"
-      >
-        Sign in
-      </button>
+      <div>
+        <button
+          onClick={handleFrameSignIn}
+          className="bg-[#8a63d2] hover:bg-[#7a53c2] text-white font-semibold py-2 px-4 rounded-xl transition-colors"
+        >
+          Sign in
+        </button>
+        {/* Debug info */}
+        <div className="text-xs text-gray-500 mt-1">
+          FID: {frameContext.fid}
+        </div>
+      </div>
     )
   }
 
