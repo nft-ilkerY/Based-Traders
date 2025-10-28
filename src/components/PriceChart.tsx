@@ -97,7 +97,7 @@ export default function PriceChart({ data }: PriceChartProps) {
             <text
               x={width - leftPadding - 55}
               y={label.y - 5}
-              fill="rgba(255, 255, 255, 0.3)"
+              fill="rgba(255, 255, 255, 0.6)"
               fontSize="11"
               fontWeight="500"
               fontFamily="Arial, sans-serif"
