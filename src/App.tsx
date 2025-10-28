@@ -50,26 +50,15 @@ function AppContent() {
   // Debug: Log authentication state changes
   console.log('AppContent render - isAuthenticated:', isAuthenticated, 'profile:', profile, 'restored:', restoredProfile, 'frameContext:', frameContext)
 
-  // Check for Farcaster Frame context (mobile app)
+  // Don't auto-login, just store frame context availability
   useEffect(() => {
     const checkFrameContext = async () => {
       try {
         const context = await sdk.context
-        console.log('📱 Frame SDK Context:', context)
+        console.log('📱 Frame SDK Context available:', !!context?.user, context)
+        // Store context but don't auto-login
         if (context?.user) {
-          setFrameContext({
-            fid: context.user.fid,
-            username: context.user.username,
-            displayName: context.user.displayName,
-            pfpUrl: context.user.pfpUrl,
-          })
-          // Save to session
-          sessionManager.save({
-            fid: context.user.fid,
-            username: context.user.username || '',
-            displayName: context.user.displayName,
-            pfpUrl: context.user.pfpUrl,
-          })
+          setFrameContext(context.user)
         }
       } catch (error) {
         console.log('Not in Farcaster frame context:', error)
@@ -113,9 +102,9 @@ function AppContent() {
     }
   }, [isAuthenticated, profile, restoredProfile])
 
-  // Use frame context first (mobile app), then AuthKit profile, then restored profile
-  const activeProfile = frameContext || profile || restoredProfile
-  const isLoggedIn = !!frameContext || isAuthenticated || !!restoredProfile
+  // Use AuthKit profile or restored profile (frameContext used only after sign in button)
+  const activeProfile = profile || restoredProfile
+  const isLoggedIn = isAuthenticated || !!restoredProfile
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#090a0f] via-[#0a0b10] to-[#0b0c11] text-white">

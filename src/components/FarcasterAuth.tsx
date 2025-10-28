@@ -1,7 +1,41 @@
+import { useState, useEffect } from 'react'
 import { SignInButton, useProfile } from '@farcaster/auth-kit'
+import sdk from '@farcaster/frame-sdk'
+import { sessionManager } from '../lib/sessionManager'
 
 export default function FarcasterAuth() {
   const { isAuthenticated, profile } = useProfile()
+  const [frameContext, setFrameContext] = useState<any>(null)
+
+  // Check for frame context on mount
+  useEffect(() => {
+    const checkFrameContext = async () => {
+      try {
+        const context = await sdk.context
+        if (context?.user) {
+          setFrameContext(context.user)
+        }
+      } catch (error) {
+        console.log('No frame context')
+      }
+    }
+    checkFrameContext()
+  }, [])
+
+  const handleFrameSignIn = () => {
+    if (frameContext) {
+      console.log('📱 Signing in with Frame context:', frameContext)
+      // Save frame context to session
+      sessionManager.save({
+        fid: frameContext.fid,
+        username: frameContext.username || '',
+        displayName: frameContext.displayName,
+        pfpUrl: frameContext.pfpUrl,
+      })
+      // Reload page to trigger session restoration
+      window.location.reload()
+    }
+  }
 
   if (isAuthenticated && profile) {
     return (
@@ -27,6 +61,19 @@ export default function FarcasterAuth() {
     )
   }
 
+  // If in Farcaster app, show simple sign in button
+  if (frameContext) {
+    return (
+      <button
+        onClick={handleFrameSignIn}
+        className="bg-[#8a63d2] hover:bg-[#7a53c2] text-white font-semibold py-2 px-4 rounded-xl transition-colors"
+      >
+        Sign in
+      </button>
+    )
+  }
+
+  // Default: QR code sign in
   return (
     <div className="w-full sm:w-auto">
       <SignInButton
