@@ -42,12 +42,9 @@ export default function TradingInterface({ overrideProfile }: TradingInterfacePr
 
   // Initialize player when Farcaster connects
   useEffect(() => {
-    console.log('🔍 Player init check:', { isLoggedIn, profile, hasUsername: !!profile?.username })
     if (isLoggedIn && profile?.username) {
-      console.log('✅ Initializing player:', profile.username, profile)
       setPlayerLoading(true)
 
-      // Create player in database with Farcaster profile
       fetch('/api/player/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -66,13 +63,11 @@ export default function TradingInterface({ overrideProfile }: TradingInterfacePr
       })
       .then(state => {
         if (state) {
-          console.log('Player state initialized:', state)
           setPlayerState(state)
         }
         setPlayerLoading(false)
       })
-      .catch(error => {
-        console.error('Failed to create/init player:', error)
+      .catch(() => {
         setPlayerLoading(false)
       })
     }

@@ -67,20 +67,14 @@ export default function Profile({ overrideProfile }: ProfileProps = { overridePr
     if (!profile?.username) return
 
     try {
-      console.log('Loading profile for:', profile.username)
-
-      // Get current player state from memory
       const playerState = gameState.getPlayerState(profile.username)
-      console.log('Player state from memory:', playerState)
 
       if (!playerState) {
-        console.log('No player state found, initializing...')
         await gameState.initPlayer(profile.username)
         setTimeout(loadProfileData, 100)
         return
       }
 
-      // Try to fetch from API
       let statsData
       let tradesData = []
 
@@ -90,20 +84,14 @@ export default function Profile({ overrideProfile }: ProfileProps = { overridePr
           fetch(`/api/positions/${profile.username}/closed`)
         ])
 
-        console.log('Stats response status:', statsRes.status)
-        console.log('Trades response status:', tradesRes.status)
-
         if (statsRes.ok) {
           statsData = await statsRes.json()
         }
         if (tradesRes.ok) {
           tradesData = await tradesRes.json()
         }
-
-        console.log('Stats data from API:', statsData)
-        console.log('Trades data from API:', tradesData)
       } catch (apiError) {
-        console.log('API fetch failed, using memory data only:', apiError)
+        // Use memory data only
       }
 
       // Calculate stats from trades data
@@ -149,13 +137,10 @@ export default function Profile({ overrideProfile }: ProfileProps = { overridePr
         total_pnl: totalPnl
       }
 
-      console.log('Final stats:', finalStats)
-
       setStats(finalStats)
       setTrades(Array.isArray(tradesData) ? tradesData.slice(0, 20) : [])
       setLoading(false)
     } catch (error) {
-      console.error('Failed to load profile:', error)
       setLoading(false)
     }
   }

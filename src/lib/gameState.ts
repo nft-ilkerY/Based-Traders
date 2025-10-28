@@ -54,7 +54,6 @@ export class GameState {
         const data = await response.json()
 
         if (!data) {
-          // Player doesn't exist yet
           const initialState: PlayerState = {
             username,
             cash: INITIAL_CASH,
@@ -78,8 +77,6 @@ export class GameState {
         playerStates.set(username, initialState)
         return initialState
       } catch (error) {
-        console.error('Failed to fetch player data:', error)
-        // Fallback to local state
         const initialState: PlayerState = {
           username,
           cash: INITIAL_CASH,
@@ -193,7 +190,7 @@ export class GameState {
         }),
       })
     } catch (error) {
-      console.error('Failed to save position to database:', error)
+      // Continue without DB
     }
 
     return { success: true }
@@ -260,7 +257,7 @@ export class GameState {
         }),
       })
     } catch (error) {
-      console.error('Failed to save position close to database:', error)
+      // Continue without DB
     }
 
     return { success: true }
@@ -350,7 +347,7 @@ export class GameState {
             }),
           })
         } catch (error) {
-          console.error('Failed to save liquidated position to database:', error)
+          // Continue without DB
         }
       })
 

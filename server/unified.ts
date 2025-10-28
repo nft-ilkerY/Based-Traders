@@ -47,7 +47,6 @@ class GlobalPriceEngine {
     const lastPrice = db.prepare('SELECT price FROM price_history ORDER BY timestamp DESC LIMIT 1').get() as { price: number } | undefined
     this.price = lastPrice?.price || 100
     this.trend = -0.0002
-    console.log(`🚀 Global Price Engine initialized at $${this.price.toFixed(2)}`)
   }
 
   start() {
@@ -56,8 +55,6 @@ class GlobalPriceEngine {
     this.intervalId = setInterval(() => {
       this.updatePrice()
     }, 1000)
-
-    console.log('✅ Global Price Engine started')
   }
 
   private updatePrice() {
@@ -375,16 +372,11 @@ if (!isDev) {
 
 // WebSocket
 wss.on('connection', (ws) => {
-  console.log('📡 Client connected')
   ws.send(JSON.stringify({
     price: priceEngine.getCurrentPrice(),
     history: priceEngine.getPriceHistory(120),
     timestamp: Date.now()
   }))
-
-  ws.on('close', () => {
-    console.log('📡 Client disconnected')
-  })
 })
 
 const PORT = process.env.PORT || 3002

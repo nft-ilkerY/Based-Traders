@@ -19,21 +19,15 @@ export default function FarcasterAuth({ onFrameLogin }: FarcasterAuthProps) {
           setFrameContext(context.user)
         }
       } catch (error) {
-        console.log('No frame context')
+        // Not in frame
       }
     }
     checkFrameContext()
   }, [])
 
   const handleFrameSignIn = () => {
-    console.log('🔘 Sign in button clicked')
-    console.log('📱 Frame context:', frameContext)
-
     if (frameContext && onFrameLogin) {
-      console.log('✅ Calling onFrameLogin with context')
       onFrameLogin(frameContext)
-    } else {
-      console.error('❌ No frame context or callback available', { frameContext, onFrameLogin })
     }
   }
 
@@ -63,34 +57,20 @@ export default function FarcasterAuth({ onFrameLogin }: FarcasterAuthProps) {
 
   // If in Farcaster app, show simple sign in button
   if (frameContext) {
-    console.log('🎨 Rendering Farcaster sign in button, context:', frameContext)
     return (
-      <div>
-        <button
-          onClick={handleFrameSignIn}
-          className="bg-[#8a63d2] hover:bg-[#7a53c2] text-white font-semibold py-2 px-4 rounded-xl transition-colors"
-        >
-          Sign in
-        </button>
-        {/* Debug info */}
-        <div className="text-xs text-gray-500 mt-1">
-          FID: {frameContext.fid}
-        </div>
-      </div>
+      <button
+        onClick={handleFrameSignIn}
+        className="bg-[#8a63d2] hover:bg-[#7a53c2] text-white font-semibold py-2 px-4 rounded-xl transition-colors"
+      >
+        Sign in
+      </button>
     )
   }
 
   // Default: QR code sign in
   return (
     <div className="w-full sm:w-auto">
-      <SignInButton
-        onSuccess={({ fid, username }) => {
-          console.log(`Farcaster auth success! Hello, ${username}! Your fid is ${fid}.`)
-        }}
-        onError={(error) => {
-          console.error('Farcaster auth error:', error)
-        }}
-      />
+      <SignInButton />
     </div>
   )
 }

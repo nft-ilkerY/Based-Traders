@@ -3,7 +3,6 @@ import { QueryClient } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { AuthKitProvider, useProfile } from '@farcaster/auth-kit'
-import sdk from '@farcaster/frame-sdk'
 import TradingInterface from './components/TradingInterface'
 import ProfileComponent from './components/Profile'
 import Leaderboard from './components/Leaderboard'
@@ -35,38 +34,12 @@ const authKitConfig = {
   relay: 'https://relay.farcaster.xyz',
 }
 
-// Debug: Log configuration and check for stored auth data
-console.log('AuthKit Config:', authKitConfig)
-console.log('LocalStorage keys:', Object.keys(localStorage))
-console.log('LocalStorage farcaster data:', Object.keys(localStorage).filter(k => k.includes('farcaster') || k.includes('auth')).map(k => ({ key: k, value: localStorage.getItem(k)?.substring(0, 100) })))
-
 function AppContent() {
   const { isAuthenticated, profile } = useProfile()
   const [currentPage, setCurrentPage] = useState<'home' | 'trading' | 'profile' | 'leaderboard'>('home')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [restoredProfile, setRestoredProfile] = useState<any>(null)
-  const [frameContext, setFrameContext] = useState<any>(null)
   const [frameLoggedIn, setFrameLoggedIn] = useState(false)
-
-  // Debug: Log authentication state changes
-  console.log('AppContent render - isAuthenticated:', isAuthenticated, 'profile:', profile, 'restored:', restoredProfile, 'frameContext:', frameContext, 'frameLoggedIn:', frameLoggedIn)
-
-  // Don't auto-login, just store frame context availability
-  useEffect(() => {
-    const checkFrameContext = async () => {
-      try {
-        const context = await sdk.context
-        console.log('📱 Frame SDK Context available:', !!context?.user, context)
-        // Store context but don't auto-login
-        if (context?.user) {
-          setFrameContext(context.user)
-        }
-      } catch (error) {
-        console.log('Not in Farcaster frame context:', error)
-      }
-    }
-    checkFrameContext()
-  }, [])
 
   // Save session when user authenticates
   useEffect(() => {
@@ -88,7 +61,6 @@ function AppContent() {
     if (!isAuthenticated && !profile) {
       const savedSession = sessionManager.load()
       if (savedSession) {
-        console.log('🔄 Restoring session from localStorage')
         setRestoredProfile(savedSession as any)
       }
     }
@@ -105,7 +77,6 @@ function AppContent() {
 
   // Handle frame login callback
   const handleFrameLogin = (frameUser: any) => {
-    console.log('🎯 Frame login callback received:', frameUser)
     const username = frameUser.username || frameUser.handle || frameUser.name || `user${frameUser.fid}`
 
     const frameProfile = {
@@ -115,14 +86,9 @@ function AppContent() {
       pfpUrl: frameUser.pfpUrl,
     }
 
-    // Save to session
     sessionManager.save(frameProfile)
-
-    // Set as restored profile immediately
     setRestoredProfile(frameProfile)
     setFrameLoggedIn(true)
-
-    console.log('✅ Frame user logged in:', frameProfile)
   }
 
   // Use AuthKit profile or restored profile (frameContext used only after sign in button)
@@ -318,9 +284,6 @@ function App() {
       client={queryClient}
       persistOptions={{
         persister,
-      }}
-      onSuccess={() => {
-        console.log('✅ Query cache restored from localStorage')
       }}
     >
       <AuthKitProvider config={authKitConfig}>

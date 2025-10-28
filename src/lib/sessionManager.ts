@@ -20,7 +20,6 @@ export const sessionManager = {
       timestamp: Date.now(),
     }
     localStorage.setItem(SESSION_KEY, JSON.stringify(session))
-    console.log('✅ Session saved:', session.username)
   },
 
   load(): FarcasterProfile | null {
@@ -32,15 +31,12 @@ export const sessionManager = {
       const age = Date.now() - session.timestamp
 
       if (age > SESSION_MAX_AGE) {
-        console.log('❌ Session expired')
         this.clear()
         return null
       }
 
-      console.log('✅ Session loaded:', session.username)
       return session
     } catch (error) {
-      console.error('Failed to load session:', error)
       this.clear()
       return null
     }
@@ -48,7 +44,6 @@ export const sessionManager = {
 
   clear(): void {
     localStorage.removeItem(SESSION_KEY)
-    console.log('🗑️ Session cleared')
   },
 
   isValid(): boolean {

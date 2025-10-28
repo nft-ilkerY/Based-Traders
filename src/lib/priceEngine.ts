@@ -16,26 +16,16 @@ class PriceEngine {
       const wsUrl = `${protocol}//${window.location.host}/ws`
       this.ws = new WebSocket(wsUrl)
 
-      this.ws.onopen = () => {
-        console.log('✅ Connected to price server')
-      }
-
       this.ws.onmessage = (event) => {
         const data = JSON.parse(event.data)
         this.price = data.price
         this.notifyListeners()
       }
 
-      this.ws.onerror = (error) => {
-        console.error('❌ WebSocket error:', error)
-      }
-
       this.ws.onclose = () => {
-        console.log('🔌 Disconnected from price server. Reconnecting...')
         this.reconnectTimeout = setTimeout(() => this.connect(), 3000)
       }
     } catch (error) {
-      console.error('Failed to connect:', error)
       this.reconnectTimeout = setTimeout(() => this.connect(), 3000)
     }
   }
